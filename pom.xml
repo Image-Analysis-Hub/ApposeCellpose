@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.scijava</groupId>
+		<artifactId>pom-scijava</artifactId>
+		<version>44.0.0</version>
+		<relativePath />
+	</parent>
+
+	<groupId>org.apposed.appose.cellpose</groupId>
+	<artifactId>ApposeCellpose</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+
+	<name>ApposeCellpose</name>
+	<description>Running Cellpose 3 and 4 from Java with Appose, using ImgLib2 data structure.</description>
+	<url>http://mycompany.com/imagej/bio-formats-reader/</url>
+	<inceptionYear>2026</inceptionYear>
+	<organization>
+		<name>My Company</name>
+		<url>http://mycompany.com/</url>
+	</organization>
+	<licenses>
+		<license>
+			<name>BSD-3-clause</name>
+			<url>https://opensource.org/license/bsd-3-clause/</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+
+	<developers>
+		<developer>
+			<id>StRigaud</id>
+			<name>Stephane Rigaud</name>
+			<url>https://github.com/StRigaud</url>
+			<roles>
+				<role>developer</role>
+				<role>maintainer</role>
+			</roles>
+		</developer>
+		<developer>
+			<id>gletort</id>
+			<name>Gaelle Letort</name>
+			<url>https://github.com/gletort</url>
+			<roles>
+				<role>developer</role>
+				<role>maintainer</role>
+			</roles>
+		</developer>
+		<developer>
+			<id>tinevez</id>
+			<name>Jean-Yves Tinevez</name>
+			<url>https://imagej.net/people/tinevez</url>
+			<roles>
+				<role>developer</role>
+				<role>maintainer</role>
+			</roles>
+		</developer>
+	</developers>
+
+	<contributors>
+		<contributor>
+			<name>Someone Who Contributed</name>
+			<url>http://imagej.net/User:TheirWikiUsername</url>
+			<properties>
+				<id>their-id</id>
+			</properties>
+		</contributor>
+	</contributors>
+
+	<mailingLists>
+		<mailingList>
+			<name>ImageJ Forum</name>
+			<archive>https://forum.image.sc/</archive>
+		</mailingList>
+	</mailingLists>
+
+	<scm>
+		<connection>scm:git:git://github.com/Image-Analysis-Hub/ApposeCellpose</connection>
+		<developerConnection>
+			scm:git:git@github.com:Image-Analysis-Hub/ApposeCellpose</developerConnection>
+		<tag>Cellpose_Appose-0.1.6</tag>
+		<url>https://github.com/Image-Analysis-Hub/ApposeCellpose</url>
+	</scm>
+
+	<issueManagement>
+		<system>GitHub Issues</system>
+		<url>https://github.com/Image-Analysis-Hub/ApposeCellpose/issues</url>
+	</issueManagement>
+	<ciManagement>
+		<system>None</system>
+	</ciManagement>
+
+	<properties>
+		<package-name>org.apposed.appose.cellpose</package-name>
+		<main-class>org.apposed.appose.cellpose.Cellpose</main-class>
+		<license.licenseName>bsd_3</license.licenseName>
+		<license.copyrightOwners>Appose developpers</license.copyrightOwners>
+
+		<!-- Use Java 21. -->
+		<scijava.jvm.version>21</scijava.jvm.version>
+		<scijava.jvm.build.version>[21,)</scijava.jvm.build.version>
+
+		<appose.version>0.11.0</appose.version>
+		<imglib2-appose.version>0.9.0</imglib2-appose.version>
+	</properties>
+
+
+	<dependencies>
+
+		<!-- Appose dependencies -->
+		<dependency>
+			<groupId>org.apposed</groupId>
+			<artifactId>appose</artifactId>
+			<version>${appose.version}</version>
+		</dependency>
+		
+		<!-- ImgLib2 dependencies -->
+		<dependency>
+			<groupId>net.imglib2</groupId>
+			<artifactId>imglib2-appose</artifactId>
+			<version>${imglib2-appose.version}</version>
+		</dependency>
+		
+		<!-- Test dependencies -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+	</dependencies>
+	
+	
+	<repositories>
+		<repository>
+			<id>scijava.public</id>
+			<url>https://maven.scijava.org/content/groups/public</url>
+		</repository>
+	</repositories>
+
+	<build>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<excludes>
+					<exclude>__pycache__/*</exclude>
+					<exclude>.pixi/**</exclude>
+					<exclude>.mypy_cache</exclude>
+				</excludes>
+			</resource>
+		</resources>
+	</build>
+</project>
