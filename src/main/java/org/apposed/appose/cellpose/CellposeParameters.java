@@ -151,9 +151,9 @@ public abstract class CellposeParameters
 		inputs.put( "niter", nIter <= 0 ? null : nIter );
 
 		final AxisInfo axisInfoPython = axisInfo.toPython();
-		inputs.put( "t_axis", axisInfoPython.T() );
-		inputs.put( "z_axis", axisInfoPython.Z() );
-		inputs.put( "channel_axis", axisInfoPython.C() );
+		inputs.put( "t_axis", axisInfoPython.T() < 0 ? null : axisInfoPython.T() );
+		inputs.put( "z_axis", axisInfoPython.Z() < 0 ? null : axisInfoPython.Z() );
+		inputs.put( "channel_axis", axisInfoPython.C() < 0 ? null : axisInfoPython.C() );
 		return inputs;
 	}
 
