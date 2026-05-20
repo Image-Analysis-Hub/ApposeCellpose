@@ -65,12 +65,12 @@ public record AxisInfo( int X, int Y, int C, int Z, int T )
 	public AxisInfo toPython()
 	{
 		final int nDims = nDims();
-		final int nX = X < 0 ? -1 : nDims - X;
-		final int nY = Y < 0 ? -1 : nDims - Y;
-		final int nZ = Z < 0 ? -1 : nDims - Z;
-		final int nC = C < 0 ? -1 : nDims - C;
-		final int nT = T < 0 ? -1 : nDims - T;
-		return new AxisInfo( nX, nY, nZ, nC, nT );
+		final int nX = X < 0 ? -1 : nDims - X - 1;
+		final int nY = Y < 0 ? -1 : nDims - Y - 1;
+		final int nZ = Z < 0 ? -1 : nDims - Z - 1;
+		final int nC = C < 0 ? -1 : nDims - C - 1;
+		final int nT = T < 0 ? -1 : nDims - T - 1;
+		return new AxisInfo( nX, nY, nC, nZ, nT );
 	}
 
 	/**
@@ -82,8 +82,8 @@ public record AxisInfo( int X, int Y, int C, int Z, int T )
 	public int nDims()
 	{
 		int nd = 0;
-		for ( final int d : new int[] { X, Y, Z, C, T } )
-			if ( d > 1 )
+		for ( final int d : new int[] { X, Y, C, Z, T } )
+			if ( d >= 0 )
 				nd++;
 		return nd;
 	}
@@ -141,14 +141,53 @@ public record AxisInfo( int X, int Y, int C, int Z, int T )
 
 	/**
 	 * Returns a new AxisInfo with the same values as this one, but with the
-	 * time axis removed, i.e. with the same values for X,Y,Z,C and with T set
-	 * to -1.
+	 * time axis removed, i.e. with the same values for X,Y,Z,C <b>possibly
+	 * shifted if the time axis was before them in the order of dimensions</b>
+	 * and and with T set to -1.
 	 * 
 	 * @return a new AxisInfo with the time axis removed.
 	 */
 	public AxisInfo removeTimeDim()
 	{
-		return new AxisInfo( X, Y, C, Z, -1 );
+		final int nX = ( T < X ) ? X - 1 : X;
+		final int nY = ( T < Y ) ? Y - 1 : Y;
+		final int nC = ( T < C ) ? C - 1 : C;
+		final int nZ = ( T < Z ) ? Z - 1 : Z;
+		return new AxisInfo( nX, nY, nC, nZ, -1 );
+	}
+
+	/**
+	 * Returns a new AxisInfo with the same values as this one, but with the Z
+	 * axis removed, i.e. with the same values for X,Y,C,T <b>possibly shifted
+	 * if the Z axis was before them in the order of dimensions</b> and with Z
+	 * set to -1.
+	 * 
+	 * @return a new AxisInfo with the Z axis removed.
+	 */
+	public AxisInfo removeZDim()
+	{
+		final int nX = ( Z < X ) ? X - 1 : X;
+		final int nY = ( Z < Y ) ? Y - 1 : Y;
+		final int nC = ( Z < C ) ? C - 1 : C;
+		final int nT = ( Z < T ) ? T - 1 : T;
+		return new AxisInfo( nX, nY, nC, -1, nT );
+	}
+
+	/**
+	 * Returns a new AxisInfo with the same values as this one, but with the
+	 * channel axis removed, i.e. with the same values for X,Y,Z,T <b>possibly
+	 * shifted if the channel axis was before them in the order of
+	 * dimensions</b> and with C set to -1.
+	 * 
+	 * @return a new AxisInfo with the channel axis removed.
+	 */
+	public AxisInfo removeChannelDim()
+	{
+		final int nX = ( C < X ) ? X - 1 : X;
+		final int nY = ( C < Y ) ? Y - 1 : Y;
+		final int nZ = ( C < Z ) ? Z - 1 : Z;
+		final int nT = ( C < T ) ? T - 1 : T;
+		return new AxisInfo( nX, nY, -1, nZ, nT );
 	}
 
 	@Override
