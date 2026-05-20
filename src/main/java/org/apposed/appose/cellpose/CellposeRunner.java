@@ -96,6 +96,11 @@ class CellposeRunner implements AutoCloseable
 		// Inputs.
 		final Map< String, Object > inputs = params.toApposeMap( input, axisInfo );
 
+		System.out.println( "AxisInfo: " + axisInfo ); // DEBUG
+		System.out.println( " - channel_axis: " + inputs.get( "channel_axis" ) ); // DEBUG
+		System.out.println( " - z_axis: " + inputs.get( "z_axis" ) ); // DEBUG
+		System.out.println( " - time_axis: " + inputs.get( "t_axis" ) ); // DEBUG
+
 		// The Python task.
 		final Task task = python.task( cellposeScript, inputs );
 
@@ -123,16 +128,10 @@ class CellposeRunner implements AutoCloseable
 			final NDArray flowsArr = ( NDArray ) task.outputs.get( "flows" );
 			final Img< UnsignedByteType > flows = new ShmImg<>( flowsArr );
 
-			// Drop the time singleton dimension for writing into output.
-
 			if ( output != null )
 			{
-				// Drop the time singleton dimension for writing into output.
-				final RandomAccessibleInterval< R > labelsView = Views.hyperSlice( labels, 4, 0 );
-				final RandomAccessibleInterval< UnsignedByteType > flowsView = Views.hyperSlice( flows, 4, 0 );
-
-				ImgUtil.copy( labelsView, output.labels );
-				ImgUtil.copy( flowsView, output.flows );
+				ImgUtil.copy( labels, output.labels );
+				ImgUtil.copy( flows, output.flows );
 				return output;
 			}
 			return new CellposeOutput<>( labels, flows );

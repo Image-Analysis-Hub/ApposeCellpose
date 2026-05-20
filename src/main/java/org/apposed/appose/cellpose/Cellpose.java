@@ -75,18 +75,13 @@ public class Cellpose
 				 * 5D use cases. Other use cases are unaffected.
 				 */
 
-				// Placeholder for labels output.
-				long[] ldims = input.dimensionsAsLongArray();
-				if ( axisInfo.C() >= 0 )
-				{
-					ldims[ axisInfo.C() ] = 1;
-					// only 1 channel in the labels output
-				}
-				else
-				{
-					// If there is no channel axis, we add one.
-					ldims = new long[] { ldims[ 0 ], ldims[ 1 ], 1, ldims[ 2 ], ldims[ 3 ] };
-				}
+				// Placeholder for labels output: XYZT.
+				final long[] inputDims = input.dimensionsAsLongArray();
+				final long[] ldims = new long[] {
+						inputDims[ axisInfo.X() ],
+						inputDims[ axisInfo.Y() ],
+						inputDims[ axisInfo.Z() ],
+						inputDims[ axisInfo.T() ] };
 				final Dimensions labelsDim = FinalDimensions.wrap( ldims );
 				final Img< UnsignedShortType > outputLabels = Util.getArrayOrCellImgFactory( labelsDim, new UnsignedShortType() ).create( ldims );
 
@@ -94,8 +89,14 @@ public class Cellpose
 				final Img< UnsignedByteType > outputFlows;
 				if ( params.computeFlows )
 				{
-					final long[] fdims = ldims;
-					fdims[ 2 ] = 3; // 3 channels in the flows output
+					// XYCZT, with nC = 3 for the 3 flows.
+					final long[] fdims = new long[] {
+							ldims[ 0 ],
+							ldims[ 1 ],
+							3,
+							ldims[ 2 ],
+							ldims[ 3 ] };
+					// 3 channels in the flows output
 					outputFlows = Util.getArrayOrCellImgFactory( labelsDim, new UnsignedByteType() ).create( fdims );
 				}
 				else
@@ -103,10 +104,9 @@ public class Cellpose
 					outputFlows = null;
 				}
 
-				// Process time point by time point.
-				final int outputTAxis = 4;
-				// In the output, the time axis is always the 5th dimension,
-				// after X,Y,Z,C
+				/*
+				 * Process time point by time point.
+				 */
 
 				for ( int t = 0; t < nt; t++ )
 				{
@@ -115,12 +115,12 @@ public class Cellpose
 					final AxisInfo axisInfoTp = axisInfo.removeTimeDim();
 
 					// Labels output reslice.
-					final RandomAccessibleInterval< UnsignedShortType > outputLabelsTp = Views.hyperSlice( outputLabels, outputTAxis, t );
+					final RandomAccessibleInterval< UnsignedShortType > outputLabelsTp = Views.hyperSlice( outputLabels, 3, t );
 
 					// Flows output reslice.
 					final RandomAccessibleInterval< UnsignedByteType > outputFlowsTp;
 					if ( params.computeFlows )
-						outputFlowsTp = Views.hyperSlice( outputFlows, outputTAxis, t );
+						outputFlowsTp = Views.hyperSlice( outputFlows, 4, t );
 					else
 						outputFlowsTp = null;
 
