@@ -28,7 +28,7 @@ public class CellposeDimensionalitiesTest
 {
 
 	@Test
-	void testCellpose3_XY()
+	public void testCellpose3_XY()
 	{
 		final Cellpose3Parameters params = Cellpose3Parameters.builder()
 				.model( Cellpose3BuiltinModels.CYTO2 )
@@ -39,7 +39,7 @@ public class CellposeDimensionalitiesTest
 	}
 
 	@Test
-	void testCellpose3_XYC()
+	public void testCellpose3_XYC()
 	{
 		final Cellpose3Parameters params = Cellpose3Parameters.builder()
 				.model( Cellpose3BuiltinModels.CYTO2 )
@@ -50,7 +50,7 @@ public class CellposeDimensionalitiesTest
 	}
 
 	@Test
-	void testCellpose3_XYT()
+	public void testCellpose3_XYT()
 	{
 		final Cellpose3Parameters params = Cellpose3Parameters.builder()
 				.model( Cellpose3BuiltinModels.CYTO2 )
@@ -61,7 +61,7 @@ public class CellposeDimensionalitiesTest
 	}
 
 	@Test
-	void testCellpose3_XYCT()
+	public void testCellpose3_XYCT()
 	{
 		final Cellpose3Parameters params = Cellpose3Parameters.builder()
 				.model( Cellpose3BuiltinModels.CYTO2 )
@@ -72,7 +72,7 @@ public class CellposeDimensionalitiesTest
 	}
 
 	@Test
-	void testCellpose3_XYZ()
+	public void testCellpose3_XYZ()
 	{
 		final Cellpose3Parameters params = Cellpose3Parameters.builder()
 				.model( Cellpose3BuiltinModels.CYTO2 )
@@ -84,7 +84,7 @@ public class CellposeDimensionalitiesTest
 	}
 
 	@Test
-	void testCellpose3_XYZT()
+	public void testCellpose3_XYZT()
 	{
 		final Cellpose3Parameters params = Cellpose3Parameters.builder()
 				.model( Cellpose3BuiltinModels.CYTO2 )
@@ -95,7 +95,7 @@ public class CellposeDimensionalitiesTest
 		test( cellpose3Runner( params ), CellposeTestDims.XYZT );
 	}
 
-	void testCellpose3_XYCZ()
+	public void testCellpose3_XYCZ()
 	{
 		final Cellpose3Parameters params = Cellpose3Parameters.builder()
 				.model( Cellpose3BuiltinModels.CYTO2 )
@@ -106,7 +106,7 @@ public class CellposeDimensionalitiesTest
 		test( cellpose3Runner( params ), CellposeTestDims.XYCZ );
 	}
 
-	void testCellpose3_XYCZT()
+	public void testCellpose3_XYCZT()
 	{
 		final Cellpose3Parameters params = Cellpose3Parameters.builder()
 				.model( Cellpose3BuiltinModels.CYTO2 )
@@ -118,7 +118,7 @@ public class CellposeDimensionalitiesTest
 	}
 
 	@Test
-	void testCellpose3_XYZ_NoStich()
+	public void testCellpose3_XYZ_NoStich()
 	{
 		final Cellpose3Parameters params = Cellpose3Parameters.builder()
 				.model( Cellpose3BuiltinModels.CYTO2 )
@@ -130,7 +130,7 @@ public class CellposeDimensionalitiesTest
 	}
 
 	@Test
-	void testCellpose3_XYZT_NoStich()
+	public void testCellpose3_XYZT_NoStich()
 	{
 		final Cellpose3Parameters params = Cellpose3Parameters.builder()
 				.model( Cellpose3BuiltinModels.CYTO2 )
@@ -142,7 +142,7 @@ public class CellposeDimensionalitiesTest
 	}
 
 	@Test
-	void testCellpose3_XYZT_NoStich_Mode3D()
+	public void testCellpose3_XYZT_NoStich_Mode3D()
 	{
 		final Cellpose3Parameters params = Cellpose3Parameters.builder()
 				.model( Cellpose3BuiltinModels.CYTO2 )
@@ -155,7 +155,7 @@ public class CellposeDimensionalitiesTest
 	}
 
 	@Test
-	void testCellpose3_XYCZ_NoStich()
+	public void testCellpose3_XYCZ_NoStich()
 	{
 		final Cellpose3Parameters params = Cellpose3Parameters.builder()
 				.model( Cellpose3BuiltinModels.CYTO2 )
@@ -167,7 +167,7 @@ public class CellposeDimensionalitiesTest
 	}
 
 	@Test
-	void testCellpose3_XYCZT_NoStich()
+	public void testCellpose3_XYCZT_NoStich()
 	{
 		final Cellpose3Parameters params = Cellpose3Parameters.builder()
 				.model( Cellpose3BuiltinModels.CYTO2 )
@@ -179,7 +179,7 @@ public class CellposeDimensionalitiesTest
 	}
 
 	@Test
-	void testCellpose4_XY()
+	public void testCellpose4_XY()
 	{
 		final Cellpose4Parameters params = Cellpose4Parameters.builder()
 				.computeFlows( true )
@@ -188,7 +188,7 @@ public class CellposeDimensionalitiesTest
 	}
 
 	@Test
-	void testCellpose4_XYC()
+	public void testCellpose4_XYC()
 	{
 		final Cellpose4Parameters params = Cellpose4Parameters.builder()
 				.computeFlows( true )
@@ -197,7 +197,7 @@ public class CellposeDimensionalitiesTest
 	}
 
 	@Test
-	void testCellpose4_XYT()
+	public void testCellpose4_XYT()
 	{
 		final Cellpose4Parameters params = Cellpose4Parameters.builder()
 				.computeFlows( true )
@@ -206,7 +206,7 @@ public class CellposeDimensionalitiesTest
 	}
 
 	@Test
-	void testCellpose4_XYCT()
+	public void testCellpose4_XYCT()
 	{
 		final Cellpose4Parameters params = Cellpose4Parameters.builder()
 				.computeFlows( true )
@@ -215,7 +215,7 @@ public class CellposeDimensionalitiesTest
 	}
 
 	@Test
-	void testCellpose4_XYZ()
+	public void testCellpose4_XYZ()
 	{
 		final Cellpose4Parameters params = Cellpose4Parameters.builder()
 				.stitchThreshold( 0.4 )
@@ -225,7 +225,7 @@ public class CellposeDimensionalitiesTest
 	}
 
 	@Test
-	void testCellpose4_XYZT()
+	public void testCellpose4_XYZT()
 	{
 		final Cellpose4Parameters params = Cellpose4Parameters.builder()
 				.stitchThreshold( 0.4 )
@@ -235,7 +235,7 @@ public class CellposeDimensionalitiesTest
 	}
 
 	@Test
-	void testCellpose4_XYCZ()
+	public void testCellpose4_XYCZ()
 	{
 		final Cellpose4Parameters params = Cellpose4Parameters.builder()
 				.stitchThreshold( 0.4 )
@@ -245,7 +245,7 @@ public class CellposeDimensionalitiesTest
 	}
 
 	@Test
-	void testCellpose4_XYCZT()
+	public void testCellpose4_XYCZT()
 	{
 		final Cellpose4Parameters params = Cellpose4Parameters.builder()
 				.stitchThreshold( 0.4 )
@@ -255,7 +255,7 @@ public class CellposeDimensionalitiesTest
 	}
 
 	@Test
-	void testCellpose4_XYZ_NoStich()
+	public void testCellpose4_XYZ_NoStich()
 	{
 		final Cellpose4Parameters params = Cellpose4Parameters.builder()
 				.stitchThreshold( 0. )
@@ -265,7 +265,7 @@ public class CellposeDimensionalitiesTest
 	}
 
 	@Test
-	void testCellpose4_XYZT_NoStich_Mode3D()
+	public void testCellpose4_XYZT_NoStich_Mode3D()
 	{
 		final Cellpose4Parameters params = Cellpose4Parameters.builder()
 				.stitchThreshold( 0. )
@@ -276,7 +276,7 @@ public class CellposeDimensionalitiesTest
 	}
 
 	@Test
-	void testCellpose4_XYZT_NoStich()
+	public void testCellpose4_XYZT_NoStich()
 	{
 		final Cellpose4Parameters params = Cellpose4Parameters.builder()
 				.stitchThreshold( 0. )
@@ -286,7 +286,7 @@ public class CellposeDimensionalitiesTest
 	}
 
 	@Test
-	void testCellpose4_XYCZ_NoStich()
+	public void testCellpose4_XYCZ_NoStich()
 	{
 		final Cellpose4Parameters params = Cellpose4Parameters.builder()
 				.stitchThreshold( 0. )
@@ -296,7 +296,7 @@ public class CellposeDimensionalitiesTest
 	}
 	
 	@Test
-	void testCellpose3_XYCZ_NoStich_Mode3D()
+	public void testCellpose3_XYCZ_NoStich_Mode3D()
 	{
 		final Cellpose3Parameters params = Cellpose3Parameters.builder()
 				.stitchThreshold( 0. )
@@ -307,7 +307,7 @@ public class CellposeDimensionalitiesTest
 	}
 	
 	@Test
-	void testCellpose3_XYCZT_NoStich_Mode3D()
+	public void testCellpose3_XYCZT_NoStich_Mode3D()
 	{
 		final Cellpose3Parameters params = Cellpose3Parameters.builder()
 				.stitchThreshold( 0. )
@@ -318,7 +318,7 @@ public class CellposeDimensionalitiesTest
 	}
 
 	@Test
-	void testCellpose4_XYCZ_NoStich_Mode3D()
+	public void testCellpose4_XYCZ_NoStich_Mode3D()
 	{
 		final Cellpose4Parameters params = Cellpose4Parameters.builder()
 				.stitchThreshold( 0. )
@@ -329,7 +329,7 @@ public class CellposeDimensionalitiesTest
 	}
 
 	@Test
-	void testCellpose4_XYCZT_NoStich_Mode3D()
+	public void testCellpose4_XYCZT_NoStich_Mode3D()
 	{
 		final Cellpose4Parameters params = Cellpose4Parameters.builder()
 				.stitchThreshold( 0. )
@@ -340,7 +340,7 @@ public class CellposeDimensionalitiesTest
 	}
 
 	@Test
-	void testCellpose4_XYCZT_NoStich()
+	public void testCellpose4_XYCZT_NoStich()
 	{
 		final Cellpose4Parameters params = Cellpose4Parameters.builder()
 				.stitchThreshold( 0. )
@@ -434,7 +434,9 @@ public class CellposeDimensionalitiesTest
 		}
 	}
 
-	private static final long XY_SIZE = 128;
+	private static final long X_SIZE = 156;
+
+	private static final long Y_SIZE = 128;
 
 	private static final long Z_SIZE = 16;
 
@@ -444,17 +446,17 @@ public class CellposeDimensionalitiesTest
 
 	private static enum CellposeTestDims
 	{
-		XY( new long[] { XY_SIZE, XY_SIZE }, AxisInfo.XY ),
-		XYC( new long[] { XY_SIZE, XY_SIZE, C_SIZE }, AxisInfo.XYC ),
+		XY( new long[] { X_SIZE, Y_SIZE }, AxisInfo.XY ),
+		XYC( new long[] { X_SIZE, Y_SIZE, C_SIZE }, AxisInfo.XYC ),
 
-		XYT( new long[] { XY_SIZE, XY_SIZE, T_SIZE }, AxisInfo.XYT ),
-		XYCT( new long[] { XY_SIZE, XY_SIZE, C_SIZE, T_SIZE }, AxisInfo.XYCT ),
+		XYT( new long[] { X_SIZE, Y_SIZE, T_SIZE }, AxisInfo.XYT ),
+		XYCT( new long[] { X_SIZE, Y_SIZE, C_SIZE, T_SIZE }, AxisInfo.XYCT ),
 
-		XYZ( new long[] { XY_SIZE, XY_SIZE, Z_SIZE }, AxisInfo.XYZ ),
-		XYCZ( new long[] { XY_SIZE, XY_SIZE, C_SIZE, Z_SIZE }, AxisInfo.XYCZ ),
+		XYZ( new long[] { X_SIZE, Y_SIZE, Z_SIZE }, AxisInfo.XYZ ),
+		XYCZ( new long[] { X_SIZE, Y_SIZE, C_SIZE, Z_SIZE }, AxisInfo.XYCZ ),
 
-		XYZT( new long[] { XY_SIZE, XY_SIZE, Z_SIZE, T_SIZE }, AxisInfo.XYZT ),
-		XYCZT( new long[] { XY_SIZE, XY_SIZE, C_SIZE, Z_SIZE, T_SIZE }, AxisInfo.XYCZT ),
+		XYZT( new long[] { X_SIZE, Y_SIZE, Z_SIZE, T_SIZE }, AxisInfo.XYZT ),
+		XYCZT( new long[] { X_SIZE, Y_SIZE, C_SIZE, Z_SIZE, T_SIZE }, AxisInfo.XYCZT ),
 		;
 
 		private final long[] dims;
@@ -485,7 +487,7 @@ public class CellposeDimensionalitiesTest
 			{
 
 				view = Views.hyperSlice( img, axes.T(), t );
-				processTimepoint( view, axes, ( int ) t );
+				processTimepoint( view, axes.removeTimeDim(), ( int ) t );
 			}
 		}
 		else
@@ -504,7 +506,7 @@ public class CellposeDimensionalitiesTest
 		{
 			// Write only in channel 0
 			final RandomAccessibleInterval< UnsignedByteType > view = Views.hyperSlice( img, axes.C(), 0 );
-			processChannel( view, axes, tp );
+			processChannel( view, axes.removeChannelDim(), tp );
 		}
 	}
 
@@ -531,7 +533,7 @@ public class CellposeDimensionalitiesTest
 
 		final int radius = 30;
 		// Slight shift with time.
-		final int[] center = new int[] { ( int ) ( XY_SIZE / 2. + 5. * tp ), ( int ) ( XY_SIZE / 2. ) };
+		final int[] center = new int[] { ( int ) ( Y_SIZE / 2. + 5. * tp ), ( int ) ( Y_SIZE / 2. ) };
 		final FinalInterval blob = Intervals.createMinMax( center[ 0 ] - radius, center[ 1 ] - radius, center[ 0 ] + radius, center[ 1 ] + radius );
 		Views.interval( img, blob ).forEach( p -> p.set( 200 ) );
 	}
@@ -547,7 +549,8 @@ public class CellposeDimensionalitiesTest
 
 		try
 		{
-			final CellposeTestDims[] toTest = new CellposeTestDims[] { CellposeTestDims.XY };
+//			final CellposeTestDims[] toTest = new CellposeTestDims[] { CellposeTestDims.XY, CellposeTestDims.XYC, CellposeTestDims.XYT, CellposeTestDims.XYCT };
+			final CellposeTestDims[] toTest = new CellposeTestDims[] { CellposeTestDims.XYZT };
 //			final CellposeTestDims[] toTest = CellposeTestDims.values();
 			for ( final CellposeTestDims dims : toTest )
 			{
