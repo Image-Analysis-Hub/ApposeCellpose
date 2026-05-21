@@ -388,12 +388,12 @@ public class CellposeDimensionalitiesTest
 		// Labels.
 		final RandomAccessibleInterval< UnsignedShortType > labels = outputs.labels;
 		final AxisInfo outputAxes = outputs.axesLabels;
-		testDimSize( input, inputAxes, 1, labels, outputAxes, dims.name() );
+		testDimSize( input, inputAxes, 1, labels, outputAxes, dims.name(), "Labels" );
 
 		// Flows/
 		final RandomAccessibleInterval< UnsignedByteType > flows = outputs.flows;
 		final AxisInfo axesFlows = outputs.axesFlows;
-		testDimSize( input, inputAxes, 3, flows, axesFlows, dims.name() );
+		testDimSize( input, inputAxes, 3, flows, axesFlows, dims.name(), "Flows" );
 	}
 
 	private static void testDimSize(
@@ -402,30 +402,31 @@ public class CellposeDimensionalitiesTest
 			final long expectedNChannels,
 			final Dimensions actualDim,
 			final AxisInfo actualAxes,
-			final String caseName )
+			final String caseName,
+			final String imageName )
 	{
 		final long inputWidth = expectedAxes.nX( expectedDim );
 		final long outputWidth = actualAxes.nX( actualDim );
-		assertEquals( "For case " + caseName + ": Label output and input must have the same X size.", inputWidth, outputWidth );
+		assertEquals( "For case " + caseName + ": " + imageName + " output and input must have the same X size.", inputWidth, outputWidth );
 
 		// Y
 		final long inputHeight = expectedAxes.nY( expectedDim );
 		final long outputHeight = actualAxes.nY( actualDim );
-		assertEquals( "For case " + caseName + ": Label output and input must have the same Y size.", inputHeight, outputHeight );
+		assertEquals( "For case " + caseName + ":" + imageName + " output and input must have the same Y size.", inputHeight, outputHeight );
 
 		// C
 		final long outputChannels = actualAxes.nChannels( actualDim );
-		assertEquals( "For case " + caseName + ": Label output must have " + expectedNChannels + " channel.", expectedNChannels, outputChannels );
+		assertEquals( "For case " + caseName + ": " + imageName + " output must have " + expectedNChannels + " channel.", expectedNChannels, outputChannels );
 
 		// Z
 		final long inputDepth = expectedAxes.nZ( expectedDim );
 		final long outputDepth = actualAxes.nZ( actualDim );
-		assertEquals( "For case " + caseName + ": Label output and input must have the same Z size.", inputDepth, outputDepth );
+		assertEquals( "For case " + caseName + ": " + imageName + " output and input must have the same Z size.", inputDepth, outputDepth );
 
 		// T
 		final long inputTimepoints = expectedAxes.nTimePoints( expectedDim );
 		final long outputTimepoints = actualAxes.nTimePoints( actualDim );
-		assertEquals( "For case " + caseName + ": Label output and input must have the same T size.", inputTimepoints, outputTimepoints );
+		assertEquals( "For case " + caseName + ": " + imageName + " output and input must have the same T size.", inputTimepoints, outputTimepoints );
 	}
 
 	private static final long X_SIZE = 156;
