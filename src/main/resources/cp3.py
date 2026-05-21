@@ -194,8 +194,8 @@ task.update(
     message=f"CP3: Start Cellpose (device={device})"
 )
 
-task.update(
-    message=f"CP3: Start Cellpose with channel_axis={channel_axis}, z_axis={z_axis}, time_axis={time_axis}")
+# task.update(
+#     message=f"CP3: Start Cellpose with channel_axis={channel_axis}, z_axis={z_axis}, time_axis={time_axis}")
 
 masks, flows, styles = run_cellpose_v3(
     input_image,
@@ -234,8 +234,8 @@ if compute_flows:
     # Move the last axis (C axis) to before Y and X. There might other dims before.
     flows = np.moveaxis(flows[0], -1, -3) if compute_flows else None
 
-task.update(
-    message=f"CP3: Returning results (after flip: labels shape={masks.shape}, flows shape={flows.shape if compute_flows else 'N/A'})")
+# task.update(
+#     message=f"CP3: Returning results (after flip: labels shape={masks.shape}, flows shape={flows.shape if compute_flows else 'N/A'})")
 
 if appose_mode:
     task.outputs["labels"] = share_as_ndarray(masks)

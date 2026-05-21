@@ -264,7 +264,7 @@ task.update(
     message=f"CP4: Returning results"
 )
 
-task.update(message=f'Flows shape before flip: {flows[0].shape if compute_flows else None}')
+# task.update(message=f'Flows shape before flip: {flows[0].shape if compute_flows else None}')
 
 # Massage outputs
 if compute_flows:
@@ -272,10 +272,10 @@ if compute_flows:
     flows = np.moveaxis(flows[0], -1, -3) if compute_flows else None
 
 # return output
-task.update(message=f'Input image shape: {input_image.shape}')
-task.update(message=f'Masks shape: {masks.shape}')
-task.update(message=f'Flows shape: {flows.shape if compute_flows else None}')
-task.update(message=f'Z axis: {z_axis}, Time axis: {time_axis}')
+# task.update(message=f'Input image shape: {input_image.shape}')
+# task.update(message=f'Masks shape: {masks.shape}')
+# task.update(message=f'Flows shape: {flows.shape if compute_flows else None}')
+# task.update(message=f'Z axis: {z_axis}, Time axis: {time_axis}')
 
 if appose_mode:
     task.outputs["labels"] = share_as_ndarray(masks)
