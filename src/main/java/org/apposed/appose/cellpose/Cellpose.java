@@ -154,7 +154,7 @@ public class Cellpose
 			else
 			{
 				// Otherwise process in one go.
-				return runner.run( input, axisInfo.removeChannelDim(), null );
+				return runner.run( input, axisInfo, null );
 			}
 		}
 	}
