@@ -233,6 +233,31 @@ public record AxisInfo( int X, int Y, int C, int Z, int T )
 		return new AxisInfo( nX, nY, -1, nZ, nT );
 	}
 
+	/**
+	 * Returns a new AxisInfo with the same values as this one, but with a
+	 * channel axis inserted at the specified position, i.e. with the same
+	 * values for X,Y Z,T <b>possibly shifted if the channel axis is inserted
+	 * before them in the order of dimensions</b> and with C set to the
+	 * specified position.
+	 * 
+	 * @param pos
+	 *            the position at which to insert the channel axis.
+	 * @return a new AxisInfo.
+	 * @throws IllegalStateException
+	 *             if this AxisInfo already has a channel axis.
+	 */
+	public AxisInfo insertChannelDim( final int pos )
+	{
+		if ( C >= 0 )
+			throw new IllegalStateException( "This AxisInfo already has a channel axis" );
+
+		final int nX = ( pos <= X ) ? X + 1 : X;
+		final int nY = ( pos <= Y ) ? Y + 1 : Y;
+		final int nZ = ( pos <= Z ) ? Z + 1 : Z;
+		final int nT = ( pos <= T ) ? T + 1 : T;
+		return new AxisInfo( nX, nY, pos, nZ, nT );
+	}
+
 	@Override
 	public String toString()
 	{
