@@ -224,7 +224,7 @@ public class CellposeDimensionalitiesTest
 		test( cellpose4Runner( params ), CellposeTestDims.XYZ );
 	}
 
-	@Test
+	@Test // 30s
 	public void testCellpose4_XYZT()
 	{
 		final Cellpose4Parameters params = Cellpose4Parameters.builder()
@@ -244,7 +244,7 @@ public class CellposeDimensionalitiesTest
 		test( cellpose4Runner( params ), CellposeTestDims.XYCZ );
 	}
 
-	@Test
+	@Test // 30s
 	public void testCellpose4_XYCZT()
 	{
 		final Cellpose4Parameters params = Cellpose4Parameters.builder()
@@ -264,7 +264,7 @@ public class CellposeDimensionalitiesTest
 		test( cellpose4Runner( params ), CellposeTestDims.XYZ );
 	}
 
-	@Test
+//	@Test // So slow!! 450s!
 	public void testCellpose4_XYZT_NoStich_Mode3D()
 	{
 		final Cellpose4Parameters params = Cellpose4Parameters.builder()
@@ -275,7 +275,7 @@ public class CellposeDimensionalitiesTest
 		test( cellpose4Runner( params ), CellposeTestDims.XYZT );
 	}
 
-	@Test
+	@Test // 30s
 	public void testCellpose4_XYZT_NoStich()
 	{
 		final Cellpose4Parameters params = Cellpose4Parameters.builder()
@@ -317,7 +317,7 @@ public class CellposeDimensionalitiesTest
 		test( cellpose3Runner( params ), CellposeTestDims.XYCZT );
 	}
 
-	@Test
+	@Test // 90s
 	public void testCellpose4_XYCZ_NoStich_Mode3D()
 	{
 		final Cellpose4Parameters params = Cellpose4Parameters.builder()
@@ -328,7 +328,7 @@ public class CellposeDimensionalitiesTest
 		test( cellpose4Runner( params ), CellposeTestDims.XYCZ );
 	}
 
-	@Test
+//	@Test // So slow!!
 	public void testCellpose4_XYCZT_NoStich_Mode3D()
 	{
 		final Cellpose4Parameters params = Cellpose4Parameters.builder()
@@ -339,7 +339,7 @@ public class CellposeDimensionalitiesTest
 		test( cellpose4Runner( params ), CellposeTestDims.XYCZT );
 	}
 
-	@Test
+	@Test // 30s
 	public void testCellpose4_XYCZT_NoStich()
 	{
 		final Cellpose4Parameters params = Cellpose4Parameters.builder()
