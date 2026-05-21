@@ -34,7 +34,10 @@ public class Cellpose
 	 * @param <T>
 	 *            the pixel type of the input image.
 	 * @param img
-	 *            the input image.
+	 *            the input image. X and Y axes must be at positions 0 and 1
+	 *            respectively.
+	 * @param axisInfo
+	 *            the AxisInfo of the input image.
 	 * @param params
 	 *            the parameters to run Cellpose with.
 	 * @param pythonScriptPath
@@ -55,6 +58,9 @@ public class Cellpose
 			final String envName,
 			final ApposeTaskListener listener ) throws BuildException, IOException, InterruptedException, TaskException
 	{
+		if ( axisInfo.X() != 0 || axisInfo.Y() != 1 )
+			throw new IllegalArgumentException( "X and Y axes must be at positions 0 and 1 respectively." );
+
 		try (final CellposeRunner runner = new CellposeRunner( params, pythonScriptPath, envName, listener ))
 		{
 			runner.init();
@@ -160,11 +166,20 @@ public class Cellpose
 	 * @param <T>
 	 *            the pixel type of the input image.
 	 * @param img
-	 *            the input image.
+	 *            the input image. X and Y axes must be at positions 0 and 1
+	 *            respectively. If not, a {@link IllegalArgumentException} is
+	 *            thrown.
+	 * @param axisInfo
+	 *            the AxisInfo of the input image.
 	 * @param params
 	 *            the parameters to run Cellpose with.
+	 * @param listener
+	 *            the listener to receive progress updates and messages during
+	 *            the execution of the Cellpose task.
+	 * 
 	 * @return a {@link CellposeOutput} object containing the label image, and
 	 *         optionally the flows image.
+	 * 
 	 * @throws BuildException
 	 *             if installing and building the Python environment fails.
 	 * @throws IOException
@@ -193,11 +208,20 @@ public class Cellpose
 	 * @param <T>
 	 *            the pixel type of the input image.
 	 * @param img
-	 *            the input image.
+	 *            the input image. X and Y axes must be at positions 0 and 1
+	 *            respectively. If not, a {@link IllegalArgumentException} is
+	 *            thrown.
+	 * @param axisInfo
+	 *            the AxisInfo of the input image.
 	 * @param params
 	 *            the parameters to run Cellpose with.
+	 * @param listener
+	 *            the listener to receive progress updates and messages during
+	 *            the execution of the Cellpose task.
+	 * 
 	 * @return a {@link CellposeOutput} object containing the label image, and
 	 *         optionally the flows image.
+	 * 
 	 * @throws BuildException
 	 *             if installing and building the Python environment fails.
 	 * @throws IOException
