@@ -3,13 +3,13 @@ package org.apposed.appose.cellpose;
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.function.BiFunction;
 
 import org.apposed.appose.BuildException;
 import org.apposed.appose.TaskException;
 import org.junit.Test;
 
+import net.imglib2.Dimensions;
 import net.imglib2.FinalInterval;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.Img;
@@ -383,55 +383,49 @@ public class CellposeDimensionalitiesTest
 	{
 		final RandomAccessibleInterval< UnsignedByteType > input = createTestImgForDims( dims );
 		final AxisInfo inputAxes = dims.axes;
-		final List< Integer > inputAxesList = List.of( inputAxes.X(), inputAxes.Y(), inputAxes.C(), inputAxes.Z(), inputAxes.T() );
 		final CellposeOutput< UnsignedShortType > outputs = runner.apply( input, dims.axes );
 
-		/*
-		 * Labels.
-		 */
+		// Labels.
 		final RandomAccessibleInterval< UnsignedShortType > labels = outputs.labels;
-		final AxisInfo outputAxes = AxisInfo.XYCZT;
-		final List< Integer > outputAxesList = List.of( outputAxes.X(), outputAxes.Y(), outputAxes.C(), outputAxes.Z(), outputAxes.T() );
+		final AxisInfo outputAxes = outputs.axesLabels;
+		testDimSize( input, inputAxes, 1, labels, outputAxes, dims.name() );
 
-		// Test output dimensions
-		final long[] inDims = input.dimensionsAsLongArray();
-		final long[] labelsDims = labels.dimensionsAsLongArray();
-		final String str = "XYCZT";
-		for ( int d = 0; d < 5; d++ )
-		{
-			final char dimName = str.charAt( d );
-			final int currentInputAxes = inputAxesList.get( d );
-			final int currentOutputAxes = outputAxesList.get( d );
-
-			if ( dimName == 'C' )
-				assertEquals( "For case " + dims.name() + ": Label output should have only one channel.",
-						1, labelsDims[ currentOutputAxes ] );
-			else
-				assertEquals( "For case " + dims.name() + ": Label output and input must have the same " + dimName + " size.",
-						inDims[ currentInputAxes ], labelsDims[ currentOutputAxes ] );
-		}
-
-		/*
-		 * Flows/
-		 */
-
+		// Flows/
 		final RandomAccessibleInterval< UnsignedByteType > flows = outputs.flows;
-		// Test output dimensions
-		final long[] outFlowDims = flows.dimensionsAsLongArray();
-		for ( int d = 0; d < 5; d++ )
-		{
-			final char dimName = str.charAt( d );
-			final int currentInputAxes = inputAxesList.get( d );
-			final int currentOutputAxes = outputAxesList.get( d );
+		final AxisInfo axesFlows = outputs.axesFlows;
+		testDimSize( input, inputAxes, 3, flows, axesFlows, dims.name() );
+	}
 
-			if ( dimName == 'C' )
-				// C must always be there, and of dim 3.
-				assertEquals( "For case " + dims.name() + ": Flow output must have 3 channels.",
-						3, outFlowDims[ currentOutputAxes ] );
-			else
-				assertEquals( "For case " + dims.name() + ": Flow output and input must have the same " + dimName + " size.",
-						inDims[ currentInputAxes ], outFlowDims[ currentOutputAxes ] );
-		}
+	private static void testDimSize(
+			final Dimensions expectedDim,
+			final AxisInfo expectedAxes,
+			final long expectedNChannels,
+			final Dimensions actualDim,
+			final AxisInfo actualAxes,
+			final String caseName )
+	{
+		final long inputWidth = expectedAxes.nX( expectedDim );
+		final long outputWidth = actualAxes.nX( actualDim );
+		assertEquals( "For case " + caseName + ": Label output and input must have the same X size.", inputWidth, outputWidth );
+
+		// Y
+		final long inputHeight = expectedAxes.nY( expectedDim );
+		final long outputHeight = actualAxes.nY( actualDim );
+		assertEquals( "For case " + caseName + ": Label output and input must have the same Y size.", inputHeight, outputHeight );
+
+		// C
+		final long outputChannels = actualAxes.nChannels( actualDim );
+		assertEquals( "For case " + caseName + ": Label output must have " + expectedNChannels + " channel.", expectedNChannels, outputChannels );
+
+		// Z
+		final long inputDepth = expectedAxes.nZ( expectedDim );
+		final long outputDepth = actualAxes.nZ( actualDim );
+		assertEquals( "For case " + caseName + ": Label output and input must have the same Z size.", inputDepth, outputDepth );
+
+		// T
+		final long inputTimepoints = expectedAxes.nTimePoints( expectedDim );
+		final long outputTimepoints = actualAxes.nTimePoints( actualDim );
+		assertEquals( "For case " + caseName + ": Label output and input must have the same T size.", inputTimepoints, outputTimepoints );
 	}
 
 	private static final long X_SIZE = 156;
@@ -550,7 +544,7 @@ public class CellposeDimensionalitiesTest
 		try
 		{
 //			final CellposeTestDims[] toTest = new CellposeTestDims[] { CellposeTestDims.XY, CellposeTestDims.XYC, CellposeTestDims.XYT, CellposeTestDims.XYCT };
-			final CellposeTestDims[] toTest = new CellposeTestDims[] { CellposeTestDims.XYZT };
+			final CellposeTestDims[] toTest = new CellposeTestDims[] { CellposeTestDims.XY };
 //			final CellposeTestDims[] toTest = CellposeTestDims.values();
 			for ( final CellposeTestDims dims : toTest )
 			{
