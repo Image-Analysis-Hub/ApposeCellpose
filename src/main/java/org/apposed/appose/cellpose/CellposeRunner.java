@@ -96,11 +96,6 @@ class CellposeRunner implements AutoCloseable
 		// Inputs.
 		final Map< String, Object > inputs = params.toApposeMap( input, axisInfo );
 
-		System.out.println( "AxisInfo: " + axisInfo ); // DEBUG
-		System.out.println( " - channel_axis: " + inputs.get( "channel_axis" ) ); // DEBUG
-		System.out.println( " - z_axis: " + inputs.get( "z_axis" ) ); // DEBUG
-		System.out.println( " - time_axis: " + inputs.get( "t_axis" ) ); // DEBUG
-
 		// The Python task.
 		final Task task = python.task( cellposeScript, inputs );
 
