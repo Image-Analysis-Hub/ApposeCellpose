@@ -130,12 +130,7 @@ public class Cellpose
 							outputLabelsTp,
 							axisInfoTp.removeChannelDim(),
 							outputFlowsTp,
-							new AxisInfo(
-									axisInfoTp.X(),
-									axisInfoTp.Y(),
-									2, // Add a channel dim at position 2.
-									axisInfoTp.Z(),
-									-1 ) ); // drop T
+							( axisInfoTp.C() < 0 ) ? axisInfoTp.insertChannelDim( 2 ) : axisInfoTp );
 
 					// Exec and write output in the right place.
 					runner.run( inputTp, axisInfoTp, outputTp );
@@ -147,12 +142,7 @@ public class Cellpose
 						outputLabels,
 						axisInfo.removeChannelDim(),
 						outputFlows,
-						new AxisInfo(
-								axisInfo.X(),
-								axisInfo.Y(),
-								2, // Add a channel dim at position 2.
-								axisInfo.Z(),
-								axisInfo.T() ) );
+						( axisInfo.C() < 0 ) ? axisInfo.insertChannelDim( 2 ) : axisInfo );
 				return out;
 			}
 			else

@@ -128,13 +128,7 @@ class CellposeRunner implements AutoCloseable
 		{
 			final NDArray flowsArr = ( NDArray ) task.outputs.get( "flows" );
 			final Img< UnsignedByteType > flows = new ShmImg<>( flowsArr );
-			final AxisInfo axesFlows = new AxisInfo(
-					axesLabels.X(),
-					axesLabels.Y(),
-					2, // Add a channel dim at position 2.
-					axesLabels.Z(),
-					axesLabels.T() );
-
+			final AxisInfo axesFlows = axesLabels.insertChannelDim( 2 );
 			if ( output != null )
 			{
 				ImgUtil.copy( labels, output.labels );
