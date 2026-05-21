@@ -162,7 +162,7 @@ if appose_mode:
     task = globals()['task']
     listen(task.update)
 else:
-    from cp_utils import get_torch_device, share_as_ndarray, make_mask_5d, make_flow_5d
+    from cp_utils import get_torch_device, share_as_ndarray
     from appose.python_worker import Task
     task = Task()
 
@@ -172,7 +172,7 @@ if appose_mode:
     stitch_threshold = globals()['stitch_threshold']
     z_axis: int | None = globals()['z_axis']
     channel_axis: int | None = globals()['channel_axis']
-    time_axis: int | None = globals()['time_axis']
+    time_axis: int | None = globals()['t_axis']
     anisotropy: float = globals()['anisotropy']
     diameter: int = globals()['diameter']
     use_3D: bool = globals()['use_3D']
@@ -262,26 +262,27 @@ task.update(
     message=f"CP4: Returning results"
 )
 
+# Massage outputs
+if compute_flows:
+    # Move the last axis (C axis) to before Y and X. There might other dims before.
+    flows = np.moveaxis(flows[0], -1, -3) if compute_flows else None
+
 # return output
 task.update(message=f'Input image shape: {input_image.shape}')
 task.update(message=f'Masks shape: {masks.shape}')
+task.update(message=f'Flows shape: {flows[0].shape if compute_flows else None}')
 task.update(message=f'Z axis: {z_axis}, Time axis: {time_axis}')
-masks_5d = make_mask_5d(masks, z_axis=z_axis, time_axis=time_axis)
-if compute_flows:
-    flows_5d = make_flow_5d(flows[0], z_axis=z_axis, time_axis=time_axis)
-
-task.update(message=f'Masks 5D shape: {masks_5d.shape}')    
 
 if appose_mode:
-    task.outputs["labels"] = share_as_ndarray(masks_5d)
+    task.outputs["labels"] = share_as_ndarray(masks)
     if compute_flows:
-        task.outputs["flows"] = share_as_ndarray(flows_5d)
+        task.outputs["flows"] = share_as_ndarray(flows)
 else:
     save_path = os.path.join(sample_folder, test_file.replace('.tif', '_masks.tif'))
     io.imsave(save_path, masks.astype(np.uint16))
     if compute_flows:
         flow_save_path = os.path.join(sample_folder, test_file.replace('.tif', '_flows.tif'))
-        io.imsave(flow_save_path, flows[0].astype(np.float32))
+        io.imsave(flow_save_path, flows.astype(np.float32))
 
 task.update(
     current = 5,
