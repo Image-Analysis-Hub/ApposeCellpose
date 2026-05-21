@@ -9,11 +9,11 @@
 		<relativePath />
 	</parent>
 
-	<groupId>org.apposed.appose.cellpose</groupId>
-	<artifactId>ApposeCellpose</artifactId>
+	<groupId>net.imglib2</groupId>
+	<artifactId>imglib2-cellpose</artifactId>
     <version>0.0.1-SNAPSHOT</version>
 
-	<name>ApposeCellpose</name>
+	<name>ImgLib2 Cellpose</name>
 	<description>Running Cellpose 3 and 4 from Java with Appose, using ImgLib2 data structure.</description>
 	<url>http://mycompany.com/imagej/bio-formats-reader/</url>
 	<inceptionYear>2026</inceptionYear>
@@ -77,24 +77,24 @@
 	</mailingLists>
 
 	<scm>
-		<connection>scm:git:git://github.com/Image-Analysis-Hub/ApposeCellpose</connection>
+		<connection>scm:git:git://github.com/Image-Analysis-Hub/imglib2-cellpose</connection>
 		<developerConnection>
-			scm:git:git@github.com:Image-Analysis-Hub/ApposeCellpose</developerConnection>
+			scm:git:git@github.com:Image-Analysis-Hub/imglib2-cellpose</developerConnection>
 		<tag>Cellpose_Appose-0.1.6</tag>
-		<url>https://github.com/Image-Analysis-Hub/ApposeCellpose</url>
+		<url>https://github.com/Image-Analysis-Hub/imglib2-cellpose</url>
 	</scm>
 
 	<issueManagement>
 		<system>GitHub Issues</system>
-		<url>https://github.com/Image-Analysis-Hub/ApposeCellpose/issues</url>
+		<url>https://github.com/Image-Analysis-Hub/imglib2-cellpose/issues</url>
 	</issueManagement>
 	<ciManagement>
 		<system>None</system>
 	</ciManagement>
 
 	<properties>
-		<package-name>org.apposed.appose.cellpose</package-name>
-		<main-class>org.apposed.appose.cellpose.Cellpose</main-class>
+		<package-name>net.imglib2.cellpose</package-name>
+		<main-class>net.imglib2.cellpose.Cellpose</main-class>
 		<license.licenseName>bsd_3</license.licenseName>
 		<license.copyrightOwners>Appose developpers</license.copyrightOwners>
 

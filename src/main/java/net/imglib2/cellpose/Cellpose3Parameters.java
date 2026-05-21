@@ -30,27 +30,26 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
-package org.apposed.appose.cellpose;
+package net.imglib2.cellpose;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
 
-public class Cellpose4Parameters extends CellposeParameters
+public class Cellpose3Parameters extends CellposeParameters
 {
 
-	public final Integer chan0; // as Integer so that it can be null
+	public final Cellpose3BuiltinModels buitInModel;
 
-	public final Integer chan1;
+	public final List< Integer > channels;
 
-	public final Integer chan2;
-
-	private Cellpose4Parameters(
-			final Integer chan0,
-			final Integer chan1,
-			final Integer chan2,
+	private Cellpose3Parameters(
+			final Cellpose3BuiltinModels buitInModel,
+			final List< Integer > channels,
 			final String customModel,
 			final double diameter,
 			final boolean do3D,
@@ -72,31 +71,18 @@ public class Cellpose4Parameters extends CellposeParameters
 				cellProbThreshold, useGpu, minSize, anisotropy,
 				stitchThreshold, resample, tileOverlap, computeFlows,
 				flow3dSmooth, nIter );
-		this.chan0 = chan0;
-		this.chan1 = chan1;
-		this.chan2 = chan2;
+		this.buitInModel = buitInModel;
+		this.channels = channels;
 	}
 
-	/**
-	 * Creates a parameters map suitable for passing to Appose, using the
-	 * specified image as input, and the parameter values stored in this object.
-	 * 
-	 * @param <T>
-	 *            the pixel type of the input image.
-	 * @param img
-	 *            the input image.
-	 * @return a new map.
-	 */
 	@Override
 	public < T extends RealType< T > & NativeType< T > > Map< String, Object > toApposeMap( final RandomAccessibleInterval< T > img, final AxisInfo axisInfo )
 	{
 		final Map< String, Object > inputs = super.toApposeMap( img, axisInfo );
-
-		final long nChannels = axisInfo.nChannels( img );
-		inputs.put( "n_channels", nChannels );
-		inputs.put( "chan0", chan0 );
-		inputs.put( "chan1", chan1 );
-		inputs.put( "chan2", chan2 );
+		final boolean isBuiltInModel = customModel == null || customModel.equals( "" );
+		inputs.put( "model_name", isBuiltInModel ? buitInModel.modelName() : null );
+		inputs.put( "cell_channel", channels.get( 0 ) );
+		inputs.put( "nuclei_channel", channels.get( 1 ) );
 		return inputs;
 	}
 
@@ -109,44 +95,70 @@ public class Cellpose4Parameters extends CellposeParameters
 	// Builder class for fluent construction
 	public static class Builder extends CellposeParameters.Builder< Builder >
 	{
+		private Cellpose3BuiltinModels model = Cellpose3BuiltinModels.CYTO3;
 
-		private Integer chan0 = 0;  // to have one selected by default
+		private List< Integer > channels = List.of( 0, 0 );
 
-		private Integer chan1 = null;
-
-		private Integer chan2 = null;
-
-		public Builder chan0( final Integer chan0 )
+		public Builder model( final Cellpose3BuiltinModels model )
 		{
-			this.chan0 = chan0;
+			this.model = model;
 			return this;
 		}
 
-		public Builder chan1( final Integer chan1 )
+		public Builder channels( final List< Integer > channels )
 		{
-			this.chan1 = chan1;
+			this.channels = channels;
 			return this;
 		}
 
-		public Builder chan2( final Integer chan2 )
+		public Builder channels( final Integer channel1, final Integer channel2 )
 		{
-			this.chan2 = chan2;
+			this.channels = Arrays.asList( channel1, channel2 );
+			return this;
+		}
+		
+		public Builder channels( final int channel1, final int channel2 )
+		{
+			this.channels = Arrays.asList( channel1, channel2 );
 			return this;
 		}
 
 		@Override
-		public Cellpose4Parameters build()
+		public Cellpose3Parameters build()
 		{
-			return new Cellpose4Parameters(
-					chan0, chan1, chan2, customModel, diameter, do3D, normalize,
+			return new Cellpose3Parameters(
+					model, channels, customModel, diameter, do3D, normalize,
 					flowThreshold, cellProbThreshold, useGpu, minSize,
 					anisotropy, stitchThreshold, resample, tileOverlap,
 					computeFlows, flow3dSmooth, nIter );
 		}
 	}
 
-	public static Cellpose4Parameters defaultParameters()
+	// Default parameters for common use cases
+	public static Cellpose3Parameters defaultCyto3Parameters()
 	{
-		return builder().build();
+		return builder()
+				.model( Cellpose3BuiltinModels.CYTO3 )
+				.channels( 0, 0 )
+				.diameter( 30.0 )
+				.build();
+	}
+
+	public static Cellpose3Parameters defaultCyto2Parameters()
+	{
+		return builder()
+				.model( Cellpose3BuiltinModels.CYTO2 )
+				.channels( 0, 0 )
+				.diameter( 30.0 )
+				.build();
+	}
+
+	public static Cellpose3Parameters defaultNucleiParameters()
+	{
+		return builder()
+				.model( Cellpose3BuiltinModels.NUCLEI )
+				.channels( 0, 0 )
+				.diameter( 17.0 )
+				.build();
 	}
 }

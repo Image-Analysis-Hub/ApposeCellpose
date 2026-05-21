@@ -30,7 +30,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
-package org.apposed.appose.cellpose;
+package net.imglib2.cellpose;
 
 public enum Cellpose3BuiltinModels
 {

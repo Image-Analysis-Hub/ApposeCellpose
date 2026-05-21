@@ -1,4 +1,4 @@
-package org.apposed.appose.cellpose;
+package net.imglib2.cellpose;
 
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.type.NativeType;
