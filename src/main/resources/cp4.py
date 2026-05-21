@@ -205,16 +205,18 @@ if appose_mode:
 else:
     import os
     sample_folder = '../../../samples/' # When you run this script from its location.
+    
     test_file = 'testImg_XYCT.tif'
+    z_axis = None
+    channel_axis = 1
+    time_axis = 0
+
     file = os.path.join(sample_folder, test_file) 
     input_image = io.imread(file)
     custom_model = None
     diameter = 30
     use_3D = False
     stitch_threshold = 0.
-    z_axis = None
-    channel_axis = 1
-    time_axis = 0
     anisotropy = None
     compute_flows = True
     resample = True
@@ -262,6 +264,8 @@ task.update(
     message=f"CP4: Returning results"
 )
 
+task.update(message=f'Flows shape before flip: {flows[0].shape if compute_flows else None}')
+
 # Massage outputs
 if compute_flows:
     # Move the last axis (C axis) to before Y and X. There might other dims before.
@@ -270,7 +274,7 @@ if compute_flows:
 # return output
 task.update(message=f'Input image shape: {input_image.shape}')
 task.update(message=f'Masks shape: {masks.shape}')
-task.update(message=f'Flows shape: {flows[0].shape if compute_flows else None}')
+task.update(message=f'Flows shape: {flows.shape if compute_flows else None}')
 task.update(message=f'Z axis: {z_axis}, Time axis: {time_axis}')
 
 if appose_mode:
