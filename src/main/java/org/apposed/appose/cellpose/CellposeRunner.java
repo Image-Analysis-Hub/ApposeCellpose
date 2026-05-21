@@ -122,11 +122,18 @@ class CellposeRunner implements AutoCloseable
 		// Unwrap and process outputs.
 		final NDArray labelsArr = ( NDArray ) task.outputs.get( "labels" );
 		final Img< R > labels = new ShmImg<>( labelsArr );
+		final AxisInfo axesLabels = axisInfo.removeChannelDim();
 
 		if ( params.computeFlows )
 		{
 			final NDArray flowsArr = ( NDArray ) task.outputs.get( "flows" );
 			final Img< UnsignedByteType > flows = new ShmImg<>( flowsArr );
+			final AxisInfo axesFlows = new AxisInfo(
+					axesLabels.X(),
+					axesLabels.Y(),
+					2, // Add a channel dim at position 2.
+					axesLabels.Z(),
+					axesLabels.T() );
 
 			if ( output != null )
 			{
@@ -134,7 +141,7 @@ class CellposeRunner implements AutoCloseable
 				ImgUtil.copy( flows, output.flows );
 				return output;
 			}
-			return new CellposeOutput<>( labels, flows );
+			return new CellposeOutput<>( labels, axesLabels, flows, axesFlows );
 		}
 
 		if ( output != null )
@@ -146,7 +153,7 @@ class CellposeRunner implements AutoCloseable
 			ImgUtil.copy( labelsView, output.labels );
 			return output;
 		}
-		return new CellposeOutput<>( labels );
+		return new CellposeOutput<>( labels, axesLabels );
 
 	}
 

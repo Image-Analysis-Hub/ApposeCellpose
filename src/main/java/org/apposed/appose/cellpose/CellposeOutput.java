@@ -20,23 +20,32 @@ public class CellposeOutput< T extends IntegerType< T > & NativeType< T > >
 	public final RandomAccessibleInterval< T > labels;
 
 	/**
-	 * The flows output from Cellpose. Always 3 channels.
+	 * The flows output from Cellpose. Always 3 channels. Can be null if the
+	 * flows were not returned by Cellpose.
 	 */
 	public final RandomAccessibleInterval< UnsignedByteType > flows;
 
 	/**
-	 * The axis order of the output. Always XYCZT.
+	 * The axes of the labels output.
 	 */
-	public final AxisInfo axisInfo = AxisInfo.XYCZT;
+	public final AxisInfo axesLabels;
+
+	/**
+	 * The axes of the flows output. Can be null if the flows were not returned
+	 * by Cellpose.
+	 */
+	public final AxisInfo axesFlows;
 	
-	public CellposeOutput( final RandomAccessibleInterval< T > labels )
+	public CellposeOutput( final RandomAccessibleInterval< T > labels, final AxisInfo axesLabels )
 	{
-		this( labels, null );
+		this( labels, axesLabels, null, null );
 	}
 
-	public CellposeOutput( final RandomAccessibleInterval< T > labels, final RandomAccessibleInterval< UnsignedByteType > flows )
+	public CellposeOutput( final RandomAccessibleInterval< T > labels, final AxisInfo axesLabels, final RandomAccessibleInterval< UnsignedByteType > flows, final AxisInfo axesFlows )
 	{
 		this.labels = labels;
+		this.axesLabels = axesLabels;
 		this.flows = flows;
+		this.axesFlows = axesFlows;
 	}
 }

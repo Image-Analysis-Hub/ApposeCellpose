@@ -60,8 +60,8 @@ public class Cellpose
 			runner.init();
 
 			// Do we have a 5D image? If yes we process time by time.
-			final int nt = axisInfo.nTimePoints( input );
-			final int nz = axisInfo.nZ( input );
+			final long nt = axisInfo.nTimePoints( input );
+			final long nz = axisInfo.nZ( input );
 
 			if ( nt > 1 && nz > 1 )
 			{
@@ -126,7 +126,16 @@ public class Cellpose
 
 					// In a CellposeOutput.
 					@SuppressWarnings( { "rawtypes", "unchecked" } )
-					final CellposeOutput< R > outputTp = new CellposeOutput( outputLabelsTp, outputFlowsTp );
+					final CellposeOutput< R > outputTp = new CellposeOutput(
+							outputLabelsTp,
+							axisInfoTp.removeChannelDim(),
+							outputFlowsTp,
+							new AxisInfo(
+									axisInfoTp.X(),
+									axisInfoTp.Y(),
+									2, // Add a channel dim at position 2.
+									axisInfoTp.Z(),
+									-1 ) ); // drop T
 
 					// Exec and write output in the right place.
 					runner.run( inputTp, axisInfoTp, outputTp );
@@ -134,13 +143,22 @@ public class Cellpose
 
 				// Return all time-points.
 				@SuppressWarnings( { "rawtypes", "unchecked" } )
-				final CellposeOutput< R > out = new CellposeOutput( outputLabels, outputFlows );
+				final CellposeOutput< R > out = new CellposeOutput(
+						outputLabels,
+						axisInfo.removeChannelDim(),
+						outputFlows,
+						new AxisInfo(
+								axisInfo.X(),
+								axisInfo.Y(),
+								2, // Add a channel dim at position 2.
+								axisInfo.Z(),
+								axisInfo.T() ) );
 				return out;
 			}
 			else
 			{
 				// Otherwise process in one go.
-				return runner.run( input, axisInfo, null );
+				return runner.run( input, axisInfo.removeChannelDim(), null );
 			}
 		}
 	}
