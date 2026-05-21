@@ -115,11 +115,45 @@ public record AxisInfo( int X, int Y, int C, int Z, int T )
 	 *            the image.
 	 * @return the number of time points in the image.
 	 */
-	public int nTimePoints( final Dimensions img )
+	public long nTimePoints( final Dimensions img )
 	{
 		if ( T < 0 )
-			return 1;
-		return ( int ) img.dimension( T );
+			return 1l;
+		return img.dimension( T );
+	}
+
+	/**
+	 * Returns the number of pixels in the X dimension of the specified image,
+	 * provided this AxisInfo properly represents the axes of the image. If the
+	 * image does not have an X axis, this method throws an
+	 * IllegalStateException.
+	 * 
+	 * @param input
+	 *            the image.
+	 * @return the number of pixels in the X dimension of the image.
+	 */
+	public long nX( final Dimensions input )
+	{
+		if ( X < 0 )
+			throw new IllegalStateException( "This AxisInfo does not have an X axis" );
+		return input.dimension( X );
+	}
+
+	/**
+	 * Returns the number of pixels in the Y dimension of the specified image,
+	 * provided this AxisInfo properly represents the axes of the image. If the
+	 * image does not have a Y axis, this method throws an
+	 * IllegalStateException.
+	 * 
+	 * @param input
+	 *            the image.
+	 * @return the number of pixels in the Y dimension of the image.
+	 */
+	public long nY( final Dimensions input )
+	{
+		if ( Y < 0 )
+			throw new IllegalStateException( "This AxisInfo does not have a Y axis" );
+		return input.dimension( Y );
 	}
 
 	/**
@@ -132,11 +166,11 @@ public record AxisInfo( int X, int Y, int C, int Z, int T )
 	 *            the image.
 	 * @return the number of Z slices in the image.
 	 */
-	public int nZ( final Dimensions input )
+	public long nZ( final Dimensions input )
 	{
 		if ( Z < 0 )
-			return 1;
-		return ( int ) input.dimension( Z );
+			return 1l;
+		return input.dimension( Z );
 	}
 
 	/**
@@ -149,6 +183,9 @@ public record AxisInfo( int X, int Y, int C, int Z, int T )
 	 */
 	public AxisInfo removeTimeDim()
 	{
+		if ( T < 0 )
+			return this;
+
 		final int nX = ( T < X ) ? X - 1 : X;
 		final int nY = ( T < Y ) ? Y - 1 : Y;
 		final int nC = ( T < C ) ? C - 1 : C;
@@ -166,6 +203,9 @@ public record AxisInfo( int X, int Y, int C, int Z, int T )
 	 */
 	public AxisInfo removeZDim()
 	{
+		if ( Z < 0 )
+			return this;
+
 		final int nX = ( Z < X ) ? X - 1 : X;
 		final int nY = ( Z < Y ) ? Y - 1 : Y;
 		final int nC = ( Z < C ) ? C - 1 : C;
@@ -183,6 +223,9 @@ public record AxisInfo( int X, int Y, int C, int Z, int T )
 	 */
 	public AxisInfo removeChannelDim()
 	{
+		if ( C < 0 )
+			return this;
+
 		final int nX = ( C < X ) ? X - 1 : X;
 		final int nY = ( C < Y ) ? Y - 1 : Y;
 		final int nZ = ( C < Z ) ? Z - 1 : Z;
