@@ -172,7 +172,7 @@ public interface ApposeTaskListener
 
 		private void progress( final double d )
 		{
-			System.out.println( String.format( "%.1f%%", d ) );
+			System.out.println( String.format( "%.1f%%", 100. * d ) );
 		}
 	}
 }
