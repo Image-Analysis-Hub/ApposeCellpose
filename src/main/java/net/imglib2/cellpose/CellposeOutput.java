@@ -41,6 +41,10 @@ import net.imglib2.type.numeric.integer.UnsignedShortType;
 
 /**
  * Represents the output of Cellpose. Stores masks and flows possibly.
+ * 
+ * @param <T>
+ *            the type of the labels output. Can be {@link UnsignedShortType} or
+ *            {@link UnsignedIntType} if N labels > 65k.
  */
 public class CellposeOutput< T extends IntegerType< T > & NativeType< T > >
 {
@@ -67,7 +71,7 @@ public class CellposeOutput< T extends IntegerType< T > & NativeType< T > >
 	 * by Cellpose.
 	 */
 	public final AxisInfo axesFlows;
-	
+
 	public CellposeOutput( final RandomAccessibleInterval< T > labels, final AxisInfo axesLabels )
 	{
 		this( labels, axesLabels, null, null );

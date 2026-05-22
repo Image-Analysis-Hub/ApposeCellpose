@@ -162,7 +162,7 @@ public record AxisInfo( int X, int Y, int C, int Z, int T )
 	 * have a Z axis, this method returns 1 (there is always at least one Z
 	 * slice).
 	 * 
-	 * @param img
+	 * @param input
 	 *            the image.
 	 * @return the number of Z slices in the image.
 	 */
