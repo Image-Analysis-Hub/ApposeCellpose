@@ -61,8 +61,8 @@ public interface ApposeTaskListener
 
 	/**
 	 * Returns a consumer that will be called with output messages related to
-	 * the execution of a Appose task, and that writes messages in the outputs
-	 * defined in this class.
+	 * the downloading, installation and deployment of an Appose environment,
+	 * and that writes messages in the outputs defined in this class.
 	 * 
 	 * @return a new output message consumer.
 	 */
@@ -70,8 +70,8 @@ public interface ApposeTaskListener
 
 	/**
 	 * Returns a consumer that will be called with error messages related to the
-	 * execution of a Appose task, and that writes messages in the outputs
-	 * defined in this class.
+	 * the downloading, installation and deployment of an Appose environment,
+	 * and that writes messages in the outputs defined in this class.
 	 * 
 	 * @return a new error message consumer.
 	 */
@@ -79,8 +79,8 @@ public interface ApposeTaskListener
 
 	/**
 	 * Returns a consumer that will be called with progress updates related to
-	 * the execution of a Appose task, and that writes messages in the outputs
-	 * defined in this class.
+	 * the downloading, installation and deployment of an Appose environment,
+	 * and that writes messages in the outputs defined in this class.
 	 * 
 	 * @return a new progress update consumer.
 	 */
