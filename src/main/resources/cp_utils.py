@@ -1,6 +1,6 @@
 ###
 # #%L
-# Running Cellpose with a Fiji plugin based on Appose.
+# Running Cellpose 3 and 4 from Java with Appose, using ImgLib2 data structure.
 # %%
 # Copyright (C) 2026 Appose developpers
 # %%
