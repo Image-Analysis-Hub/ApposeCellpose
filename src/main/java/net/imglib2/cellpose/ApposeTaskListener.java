@@ -160,7 +160,7 @@ public interface ApposeTaskListener
 		public ProgressConsumer progressListener()
 		{
 			return ( t, c, m ) -> {
-				message( t + ": " + String.format( "%.1f\\%", ( double ) c / m ) );
+				message( t + ": " + String.format( "%.1f%%", ( double ) c / m ) );
 			};
 		}
 
@@ -172,7 +172,7 @@ public interface ApposeTaskListener
 
 		private void progress( final double d )
 		{
-			System.out.println( String.format( "%.1f\\%", d ) );
+			System.out.println( String.format( "%.1f%%", d ) );
 		}
 	}
 }
