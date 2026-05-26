@@ -228,7 +228,8 @@ public class Cellpose
 			final Cellpose3Parameters params,
 			final ApposeTaskListener listener ) throws BuildException, IOException, InterruptedException, TaskException
 	{
-		final String envName = "cp3" + getBestTorchConfig();
+		///////
+		final String envName = "cp3-" + getTorchInstallSuffix( params.torchVersion );
 		final String pythonScriptPath = "/cp3.py";
 		return run( img, axisInfo, params, pythonScriptPath, envName, listener );
 	}
@@ -270,22 +271,21 @@ public class Cellpose
 			final Cellpose4Parameters params,
 			final ApposeTaskListener listener ) throws BuildException, IOException, InterruptedException, TaskException
 	{
-		final String envName = "cp4" + getBestTorchConfig();
+		final String envName = "cp4-" + getTorchInstallSuffix( params.torchVersion );
 		final String pythonScriptPath = "/cp4.py";
 		return run( img, axisInfo, params, pythonScriptPath, envName, listener );
 	}
 
-	private static String getBestTorchConfig()
+	private static String getTorchInstallSuffix(String torchVersion)
 	{
 		// if MacOS, return "-cpu"
 		if ( getOperatingSystem() == OperatingSystem.MACOS )
-			return "-cpu";
-		// getCudaVersion() already returns the mapped suffix (e.g. "126")
-		final String cudaVersion = getCudaVersion();
-		if ( cudaVersion != null )
-			return "-cu" + cudaVersion;
-		// else, return "-cpu"
-		return "-cpu";
+			return "cpu";
+
+		if ( !asCUDA() )
+			return "cpu";
+
+		return torchVersion;
 	}
 
 	public enum OperatingSystem
@@ -309,74 +309,27 @@ public class Cellpose
 	}
 
 	/**
-	 * Returns the CUDA version available on the system by querying
-	 * {@code nvidia-smi}, or {@code null} if CUDA is not available or the OS is
-	 * macOS. The returned value is already mapped to the pixi environment
-	 * suffix (e.g. {@code "126"}, {@code "130"}).
-	 * <p>
-	 * {@code nvidia-smi} is preferred over {@code nvcc} because it reflects the
-	 * driver-supported CUDA version and is present on any system with a GPU
-	 * driver installed, even without the full CUDA toolkit.
-	 *
-	 * @return a pixi suffix string such as {@code "126"}, or {@code null}.
+	 * Checks if CUDA is available on the system by trying to execute {@code nvidia-smi}.
+	 * This method returns {@code false} on macOS, as CUDA is not supported on that platform.
+	 * @return
 	 */
-	private static String getCudaVersion()
+	public static Boolean asCUDA()
 	{
 		if ( getOperatingSystem() == OperatingSystem.MACOS )
-			return null;
+			return false;
 		try
 		{
+			// try to run nvidia-smi to check if it is available
 			final ProcessBuilder pb = new ProcessBuilder( "nvidia-smi" );
 			pb.redirectErrorStream( true );
 			final Process process = pb.start();
-			final StringBuilder output = new StringBuilder();
-			try (BufferedReader reader = new BufferedReader(
-					new InputStreamReader( process.getInputStream() ) ))
-			{
-				String line;
-				while ( ( line = reader.readLine() ) != null )
-					output.append( line ).append( "\n" );
-			}
 			process.waitFor();
-			// nvidia-smi header contains e.g. "CUDA Version: 12.6"
-			final Matcher m = Pattern
-					.compile( "CUDA Version:\\s*(\\d+\\.\\d+)" )
-					.matcher( output );
-			if ( m.find() )
-				return mapCudaVersion( m.group( 1 ) );
+			return process.exitValue() == 0;
 		}
 		catch ( final IOException | InterruptedException e )
 		{
-			// nvidia-smi not found or failed — CUDA not available
+			return false;
 		}
-		return null;
 	}
 
-	/**
-	 * Maps raw CUDA version strings (as reported by {@code nvidia-smi}) to the
-	 * pixi environment suffix. Only versions listed here are supported; any
-	 * other version returns {@code null}.
-	 */
-	static final Map< String, String > CUDA_VERSION_MAP;
-	static
-	{
-		CUDA_VERSION_MAP = new HashMap<>();
-		CUDA_VERSION_MAP.put( "12", "126" );
-		CUDA_VERSION_MAP.put( "13", "130" );
-	}
-
-	/**
-	 * Maps a raw CUDA version string to the pixi environment suffix using
-	 * {@link #CUDA_VERSION_MAP}.
-	 *
-	 * @return the mapped suffix, or {@code null} if the version is not
-	 *         recognized.
-	 */
-	private static String mapCudaVersion( final String rawVersion )
-	{
-		// Only pass the major version (e.g. "12" from "12.6") to the map, as
-		// minor versions are not distinguished in the pixi environments.
-		final String majorVersion = rawVersion.split( "\\." )[ 0 ];
-		return CUDA_VERSION_MAP.get( majorVersion );
-	}
 }

@@ -85,6 +85,8 @@ public abstract class CellposeParameters
 
 	public final int nIter;
 
+	public final String torchVersion;
+
 	protected CellposeParameters(
 			final String customModel,
 			final double diameter,
@@ -100,7 +102,8 @@ public abstract class CellposeParameters
 			final double tileOverlap,
 			final boolean computeFlows,
 			final int flow3dSmooth,
-			final int nIter )
+			final int nIter,
+			final String torchVersion )
 	{
 		this.customModel = customModel;
 		this.diameter = diameter;
@@ -117,6 +120,7 @@ public abstract class CellposeParameters
 		this.computeFlows = computeFlows;
 		this.flow3dSmooth = flow3dSmooth;
 		this.nIter = nIter;
+		this.torchVersion = torchVersion;
 	}
 
 	/**
@@ -149,6 +153,7 @@ public abstract class CellposeParameters
 		inputs.put( "tile_overlap", tileOverlap );
 		inputs.put( "flow3D_smooth", flow3dSmooth );
 		inputs.put( "niter", nIter <= 0 ? null : nIter );
+		inputs.put( "use_gpu", useGpu );
 
 		final AxisInfo axisInfoPython = axisInfo.toPython();
 		inputs.put( "t_axis", axisInfoPython.T() < 0 ? null : axisInfoPython.T() );
@@ -201,6 +206,8 @@ public abstract class CellposeParameters
 		protected boolean computeFlows = false;
 
 		protected int nIter = 200;
+
+		protected String torchVersion = "cpu";
 
 		@SuppressWarnings( "unchecked" )
 		public B customModel( final String customModel )
@@ -304,6 +311,13 @@ public abstract class CellposeParameters
 		public B nIter( final int nIter )
 		{
 			this.nIter = nIter;
+			return ( B ) this;
+		}
+
+		@SuppressWarnings( "unchecked" )
+		public B torchVersion( final String torchVersion )
+		{
+			this.torchVersion = torchVersion;
 			return ( B ) this;
 		}
 

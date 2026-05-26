@@ -152,6 +152,7 @@ if appose_mode:
     time_axis: int | None = globals()['t_axis']
     anisotropy: float = globals()['anisotropy']
     niter: int | None = globals()['niter']
+    use_gpu: bool = globals()['use_gpu']
 
     input_image = fiji_image.ndarray()
     channels = manage_channels_index(cell_channel_index, nuclei_channel_index)
@@ -186,8 +187,9 @@ else:
     tile_overlap = 0.1
     flow3D_smooth = 0
     niter = None
+    use_gpu = False
 
-use_gpu, device = get_torch_device()
+use_gpu, device = get_torch_device(use_gpu)
 task.update(
     current = 1,
     maximum= 5,

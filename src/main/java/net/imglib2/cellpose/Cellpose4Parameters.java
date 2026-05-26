@@ -65,13 +65,14 @@ public class Cellpose4Parameters extends CellposeParameters
 			final double tileOverlap,
 			final boolean computeFlows,
 			final int flow3dSmooth,
-			final int nIter )
+			final int nIter,
+			final String torchVersion)
 	{
 		super(
 				customModel, diameter, do3D, normalize, flowThreshold,
 				cellProbThreshold, useGpu, minSize, anisotropy,
 				stitchThreshold, resample, tileOverlap, computeFlows,
-				flow3dSmooth, nIter );
+				flow3dSmooth, nIter, torchVersion );
 		this.chan0 = chan0;
 		this.chan1 = chan1;
 		this.chan2 = chan2;
@@ -141,7 +142,7 @@ public class Cellpose4Parameters extends CellposeParameters
 					chan0, chan1, chan2, customModel, diameter, do3D, normalize,
 					flowThreshold, cellProbThreshold, useGpu, minSize,
 					anisotropy, stitchThreshold, resample, tileOverlap,
-					computeFlows, flow3dSmooth, nIter );
+					computeFlows, flow3dSmooth, nIter, torchVersion );
 		}
 	}
 
