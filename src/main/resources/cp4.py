@@ -184,7 +184,9 @@ if appose_mode:
     niter: int | None = globals()['niter']
     tile_overlap: float = globals()['tile_overlap']
     flow3D_smooth: float = globals()['flow3D_smooth']
-    n_channels: int = globals()['n_channels']
+    n_channels: int = globals()['n_channels']    
+    use_gpu: bool = globals()['use_gpu']
+
     
     input_image = fiji_image.ndarray()  # pylint: disable=E1120
     anisotropy = anisotropy if anisotropy > 0 else None
@@ -227,8 +229,9 @@ else:
     niter = None
     tile_overlap = 0.1
     flow3D_smooth = 0
+    use_gpu = False
 
-use_gpu, device = get_torch_device()
+use_gpu, device = get_torch_device(use_gpu)
 task.update(
     current = 1,
     maximum= 5,
