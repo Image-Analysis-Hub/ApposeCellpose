@@ -32,13 +32,7 @@
  */
 package net.imglib2.cellpose;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apposed.appose.BuildException;
 import org.apposed.appose.TaskException;
@@ -228,7 +222,6 @@ public class Cellpose
 			final Cellpose3Parameters params,
 			final ApposeTaskListener listener ) throws BuildException, IOException, InterruptedException, TaskException
 	{
-		///////
 		final String envName = "cp3-" + getTorchInstallSuffix( params.torchVersion );
 		final String pythonScriptPath = "/cp3.py";
 		return run( img, axisInfo, params, pythonScriptPath, envName, listener );
@@ -276,7 +269,7 @@ public class Cellpose
 		return run( img, axisInfo, params, pythonScriptPath, envName, listener );
 	}
 
-	private static String getTorchInstallSuffix(String torchVersion)
+	private static String getTorchInstallSuffix( final String torchVersion )
 	{
 		// if MacOS, return "-cpu"
 		if ( getOperatingSystem() == OperatingSystem.MACOS )
@@ -309,8 +302,10 @@ public class Cellpose
 	}
 
 	/**
-	 * Checks if CUDA is available on the system by trying to execute {@code nvidia-smi}.
-	 * This method returns {@code false} on macOS, as CUDA is not supported on that platform.
+	 * Checks if CUDA is available on the system by trying to execute
+	 * {@code nvidia-smi}. This method returns {@code false} on macOS, as CUDA
+	 * is not supported on that platform.
+	 * 
 	 * @return
 	 */
 	public static Boolean asCUDA()
@@ -331,5 +326,4 @@ public class Cellpose
 			return false;
 		}
 	}
-
 }
