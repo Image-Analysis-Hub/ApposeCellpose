@@ -443,7 +443,7 @@ public class Cellpose
 		if ( getOperatingSystem() == OperatingSystem.MACOS )
 			return "cpu";
 
-		if ( !asCUDA() )
+		if ( !hasCUDA() )
 			return "cpu";
 
 		return torchVersion;
@@ -479,7 +479,7 @@ public class Cellpose
 	 * 
 	 * @return {@code true} if CUDA is available, {@code false} otherwise.
 	 */
-	public static Boolean asCUDA()
+	private static Boolean hasCUDA()
 	{
 		if ( getOperatingSystem() == OperatingSystem.MACOS )
 			return false;
