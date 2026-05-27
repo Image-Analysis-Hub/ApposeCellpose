@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Download build script`
 curl -fsLO https://raw.githubusercontent.com/scijava/scijava-scripts/main/ci-build.sh
