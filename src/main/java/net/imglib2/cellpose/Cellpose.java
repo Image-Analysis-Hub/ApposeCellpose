@@ -49,6 +49,11 @@ import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.util.Util;
 import net.imglib2.view.Views;
 
+/**
+ * Main class to run Cellpose 3 or Cellpose-SAM from Java, using Appose to
+ * manage Python environments and processes, and using ImgLib2 data structures
+ * as input and output.
+ */
 public class Cellpose
 {
 
@@ -191,6 +196,10 @@ public class Cellpose
 	 * 
 	 * @param <T>
 	 *            the pixel type of the input image.
+	 * @param <R>
+	 *            the pixel type of the output label image. It can be either
+	 *            UnsignedShortType or UnsignedIntType (if the number of labels
+	 *            in one image is larger than 65k).
 	 * @param img
 	 *            the input image. X and Y axes must be at positions 0 and 1
 	 *            respectively. If not, a {@link IllegalArgumentException} is
@@ -233,6 +242,10 @@ public class Cellpose
 	 * 
 	 * @param <T>
 	 *            the pixel type of the input image.
+	 * @param <R>
+	 *            the pixel type of the output label image. It can be either
+	 *            UnsignedShortType or UnsignedIntType (if the number of labels
+	 *            in one image is larger than 65k).
 	 * @param img
 	 *            the input image. X and Y axes must be at positions 0 and 1
 	 *            respectively. If not, a {@link IllegalArgumentException} is
@@ -269,6 +282,19 @@ public class Cellpose
 		return run( img, axisInfo, params, pythonScriptPath, envName, listener );
 	}
 
+	/**
+	 * Filters and returns the suffix to use for installing the correct version
+	 * of PyTorch.
+	 * <p>
+	 * This method checks the operating system and CUDA availability to
+	 * determine the appropriate suffix for installing PyTorch. If you are on a
+	 * Mac or do not have CUDA available, it returns "cpu". Otherwise, it
+	 * returns the specified torchVersion.
+	 * 
+	 * @param torchVersion
+	 *            the version of PyTorch to install if CUDA is available.
+	 * @return the suffix to use for installing the correct version of PyTorch.
+	 */
 	private static String getTorchInstallSuffix( final String torchVersion )
 	{
 		// if MacOS, return "-cpu"
@@ -281,6 +307,7 @@ public class Cellpose
 		return torchVersion;
 	}
 
+	/** Enum representing the main operating systems. */
 	public enum OperatingSystem
 	{
 		WINDOWS, LINUX, MACOS, UNKNOWN
@@ -288,6 +315,8 @@ public class Cellpose
 
 	/**
 	 * Returns the current operating system.
+	 * 
+	 * @return the current operating system.
 	 */
 	private static OperatingSystem getOperatingSystem()
 	{
@@ -306,7 +335,7 @@ public class Cellpose
 	 * {@code nvidia-smi}. This method returns {@code false} on macOS, as CUDA
 	 * is not supported on that platform.
 	 * 
-	 * @return
+	 * @return {@code true} if CUDA is available, {@code false} otherwise.
 	 */
 	public static Boolean asCUDA()
 	{
@@ -326,4 +355,8 @@ public class Cellpose
 			return false;
 		}
 	}
+
+	/** Prevent instantiation of this utility class. */
+	private Cellpose()
+	{}
 }

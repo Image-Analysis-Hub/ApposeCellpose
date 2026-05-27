@@ -46,8 +46,15 @@ import org.apposed.appose.TaskEvent;
 public interface ApposeTaskListener
 {
 
+	/**
+	 * Implementation of ApposeTaskListener that writes messages to the standard
+	 * output.
+	 */
 	public static final ApposeTaskListener STD = new StdApposeTaskListener();
 
+	/**
+	 * Implementation of ApposeTaskListener that does nothing.
+	 */
 	public static final ApposeTaskListener VOID = new VoidApposeTaskListener();
 
 	/**
@@ -94,6 +101,9 @@ public interface ApposeTaskListener
 	 */
 	void message( String msg );
 
+	/**
+	 * Implementation of ApposeTaskListener that does nothing.
+	 */
 	static class VoidApposeTaskListener implements ApposeTaskListener
 	{
 
@@ -126,6 +136,10 @@ public interface ApposeTaskListener
 		{}
 	}
 	
+	/**
+	 * Implementation of ApposeTaskListener that writes messages to the standard
+	 * output.
+	 */
 	static class StdApposeTaskListener implements ApposeTaskListener
 	{
 		@Override

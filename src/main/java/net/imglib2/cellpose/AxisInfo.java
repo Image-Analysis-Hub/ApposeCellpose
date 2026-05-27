@@ -37,6 +37,32 @@ import java.util.List;
 
 import net.imglib2.Dimensions;
 
+/**
+ * Class representing the dimensionality of an image.
+ * <p>
+ * It is used to specify which dimensions of an image correspond to the X, Y, Z,
+ * channel and time axes. The values of the axes are the indices of the
+ * dimensions in the image, or -1 if the image does not have that axis. For
+ * example, an AxisInfo with X=0, Y=1, C=2, Z=-1, T=-1 represents an image with
+ * dimensions (X,Y,C), while an AxisInfo with X=0 Y=1, Z=2, C=-1, T=-1
+ * represents an image with dimensions (X,Y,Z).
+ * 
+ * @param X
+ *            the index of the X axis, or -1 if the image does not have an X
+ *            axis.
+ * @param Y
+ *            the index of the Y axis, or -1 if the image does not have a Y
+ *            axis.
+ * @param C
+ *            the index of the channel axis, or -1 if the image does not have a
+ *            channel axis.
+ * @param Z
+ *            the index of the Z axis, or -1 if the image does not have a Z
+ *            axis.
+ * @param T
+ *            the index of the time axis, or -1 if the image does not have a
+ *            time axis.
+ */
 public record AxisInfo( int X, int Y, int C, int Z, int T )
 {
 
