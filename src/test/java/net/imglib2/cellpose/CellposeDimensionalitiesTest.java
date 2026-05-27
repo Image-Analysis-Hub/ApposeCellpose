@@ -44,13 +44,6 @@ import org.junit.Test;
 import net.imglib2.Dimensions;
 import net.imglib2.FinalInterval;
 import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.cellpose.ApposeTaskListener;
-import net.imglib2.cellpose.AxisInfo;
-import net.imglib2.cellpose.Cellpose;
-import net.imglib2.cellpose.Cellpose3BuiltinModels;
-import net.imglib2.cellpose.Cellpose3Parameters;
-import net.imglib2.cellpose.Cellpose4Parameters;
-import net.imglib2.cellpose.CellposeOutput;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
@@ -393,7 +386,7 @@ public class CellposeDimensionalitiesTest
 		return ( img, axes ) -> {
 			try
 			{
-				return Cellpose.cellpose3( img, axes, params, ApposeTaskListener.STD );
+				return Cellpose.cellpose3( img, axes, new UnsignedShortType(), params, ApposeTaskListener.STD );
 			}
 			catch ( BuildException | IOException | InterruptedException | TaskException e )
 			{
@@ -408,7 +401,7 @@ public class CellposeDimensionalitiesTest
 		return ( img, axes ) -> {
 			try
 			{
-				return Cellpose.cellpose4( img, axes, params, ApposeTaskListener.STD );
+				return Cellpose.cellpose4( img, axes, new UnsignedShortType(), params, ApposeTaskListener.STD );
 			}
 			catch ( BuildException | IOException | InterruptedException | TaskException e )
 			{
@@ -592,7 +585,7 @@ public class CellposeDimensionalitiesTest
 				System.out.println( '\n' + dims.axes.toString() );
 				System.out.println( "Testing case " + dims.name() );
 
-				final CellposeOutput< ? > output = Cellpose.cellpose3( img, dims.axes, params, ApposeTaskListener.STD );
+				final CellposeOutput< UnsignedShortType > output = Cellpose.cellpose3( img, dims.axes, new UnsignedShortType(), params, ApposeTaskListener.STD );
 
 				System.out.println( "\nInput shape:           " + Util.printInterval( img ) );
 				System.out.println( "Get Labels with shape: " + Util.printInterval( output.labels ) );
