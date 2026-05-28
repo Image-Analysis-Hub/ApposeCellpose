@@ -241,11 +241,28 @@ public class Cellpose
 	 */
 	public static < T extends RealType< T > & NativeType< T > > ShmImg< T > createInputShmImg( final RandomAccessibleInterval< T > input )
 	{
+		return createInputShmImg( input, input.getType().createVariable() );
+	}
+
+	/**
+	 * Creates an empty shared memory image with the specified dimensions and
+	 * pixel type.
+	 * 
+	 * @param <T>
+	 *            the pixel type.
+	 * @param input
+	 *            the dimensions.
+	 * @param type
+	 *            the pixel type.
+	 * @return a new ShmImg.
+	 */
+	public static < T extends RealType< T > & NativeType< T > > ShmImg< T > createInputShmImg( final Dimensions input, final T type )
+	{
 		final long[] dims = input.dimensionsAsLongArray();
 		final int[] dims2 = new int[ dims.length ];
 		for ( int i = 0; i < dims.length; i++ )
 			dims2[ i ] = ( int ) dims[ i ];
-		return new ShmImg<>( input.getType().createVariable(), dims2 );
+		return new ShmImg<>( type, dims2 );
 	}
 
 	/**
@@ -371,6 +388,27 @@ public class Cellpose
 		final String envName = "cp3-" + getTorchInstallSuffix( params.torchVersion );
 		final String pythonScriptPath = "/cp3.py";
 		return run( img, axisInfo, outputType, params, pythonScriptPath, envName, listener );
+	}
+
+	public static < T extends RealType< T > & NativeType< T >, R extends IntegerType< R > & NativeType< R > > CellposeRunner< T, R > cellpose3Runner(
+			final Cellpose3Parameters params,
+			final ApposeTaskListener listener,
+			final ShmImg< T > input,
+			final AxisInfo inputAxisInfo,
+			final ShmImg< R > outputLabels,
+			final ShmImg< UnsignedByteType > outputFlows ) throws BuildException, IOException, InterruptedException, TaskException
+	{
+		final String envName = "cp3-" + getTorchInstallSuffix( params.torchVersion );
+		final String pythonScriptPath = "/cp3.py";
+		return new CellposeRunner<>(
+				params,
+				pythonScriptPath,
+				envName,
+				listener,
+				input,
+				inputAxisInfo,
+				outputLabels,
+				outputFlows );
 	}
 
 	/**
