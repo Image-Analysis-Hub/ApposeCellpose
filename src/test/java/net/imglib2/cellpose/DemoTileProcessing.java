@@ -20,8 +20,8 @@ import ij.process.LUT;
 import net.imglib2.Cursor;
 import net.imglib2.FinalDimensions;
 import net.imglib2.Interval;
-import net.imglib2.algorithm.util.Grids;
 import net.imglib2.appose.ShmImg;
+import net.imglib2.cellpose.tiles.Grids2;
 import net.imglib2.img.Img;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.type.NativeType;
@@ -65,7 +65,7 @@ public class DemoTileProcessing
 			// Tiles.
 			final int[] blockSize = new int[] { 512, 512 };
 			final FinalDimensions blockDims = new FinalDimensions( blockSize );
-			final List< Interval > chunks = Grids.collectAllContainedIntervals( img.dimensionsAsLongArray(), blockSize );
+			final List< Interval > chunks = Grids2.collectAllContainedIntervals( img.dimensionsAsLongArray(), blockSize );
 
 			// Process.
 			final long start = System.currentTimeMillis();

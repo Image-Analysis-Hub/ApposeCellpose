@@ -30,7 +30,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
-package net.imglib2.cellpose;
+package net.imglib2.cellpose.tiles;
 
 import static org.junit.Assert.assertEquals;
 
@@ -44,6 +44,13 @@ import org.junit.Test;
 import net.imglib2.Dimensions;
 import net.imglib2.FinalInterval;
 import net.imglib2.RandomAccessibleInterval;
+import net.imglib2.cellpose.ApposeTaskListener;
+import net.imglib2.cellpose.AxisInfo;
+import net.imglib2.cellpose.Cellpose;
+import net.imglib2.cellpose.Cellpose3BuiltinModels;
+import net.imglib2.cellpose.Cellpose3Parameters;
+import net.imglib2.cellpose.Cellpose4Parameters;
+import net.imglib2.cellpose.CellposeOutput;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
@@ -326,7 +333,7 @@ public class CellposeDimensionalitiesTest
 				.build();
 		test( cellpose4Runner( params ), CellposeTestDims.XYCZ );
 	}
-	
+
 	@Test
 	public void testCellpose3_XYCZ_NoStich_Mode3D()
 	{
@@ -337,7 +344,7 @@ public class CellposeDimensionalitiesTest
 				.build();
 		test( cellpose3Runner( params ), CellposeTestDims.XYCZ );
 	}
-	
+
 	@Test
 	public void testCellpose3_XYCZT_NoStich_Mode3D()
 	{
