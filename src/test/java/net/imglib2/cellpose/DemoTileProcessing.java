@@ -9,10 +9,12 @@ import java.util.List;
 import org.apposed.appose.BuildException;
 import org.apposed.appose.TaskException;
 
+import bdv.util.BdvFunctions;
 import ij.IJ;
-import ij.ImageJ;
 import ij.ImagePlus;
+import ij.gui.NewImage;
 import ij.process.LUT;
+import net.imglib2.Cursor;
 import net.imglib2.FinalDimensions;
 import net.imglib2.Interval;
 import net.imglib2.algorithm.util.Grids;
@@ -33,14 +35,16 @@ public class DemoTileProcessing
 		try
 		{
 
-			ImageJ.main( args );
+//			ImageJ.main( args );
 
 			// Input image.
 			final String filePath = "samples/IDR-1.tif";
 			final ImagePlus imp = IJ.openImage( filePath );
 //		imp.show();
 			final Img< T > img = ImageJFunctions.wrap( imp );
+			BdvFunctions.show( img, filePath );
 			final AxisInfo axisInfo = AxisInfo.XY;
+
 
 			// Output image.
 			final Img< UnsignedShortType > output = Util.getArrayOrCellImgFactory( img, new UnsignedShortType() ).create( img );
@@ -61,7 +65,10 @@ public class DemoTileProcessing
 //		final ApposeTaskListener listener = ApposeTaskListener.VOID;
 			final ApposeTaskListener listener = ApposeTaskListener.STD;
 
-			ImagePlus outputImp = null;
+			
+			final ImagePlus outputImp = NewImage.createShortImage( "Cellpose output", img.dimension( 0 ), img.dimension( 1 ), 1, NewImage.FILL_BLACK );
+			useGlasbeyDarkLUT( outputImp );
+
 			try (final CellposeRunner< T, UnsignedShortType > runner = Cellpose.cellpose3Runner(
 					params,
 					listener,
@@ -95,18 +102,19 @@ public class DemoTileProcessing
 					final RandomAccessibleIntervalView< UnsignedShortType > viewOutput = output.view()
 							.interval( tileInterval )
 							.zeroMin();
-					ImgUtil.copy( outputLabelsShmImg, viewOutput );
+
+					// Pedestrian copy to the output ImagePlus.
+					final Cursor< UnsignedShortType > c = outputLabelsShmImg.localizingCursor();
+					while ( c.hasNext() )
+					{
+						c.fwd();
+						final int x = ( int ) ( c.getIntPosition( 0 ) + tileInterval.min( 0 ) );
+						final int y = ( int ) ( c.getIntPosition( 1 ) + tileInterval.min( 1 ) );
+						final int val = c.get().get();
+						outputImp.getProcessor().set( x, y, val );
+					}
 					System.out.println( "Tile done." );
 
-//					ImageJFunctions.show( inputShmImg, "Input tile" );
-//					ImageJFunctions.show( outputLabelsShmImg, "Output labels tile" );
-					if ( outputImp != null )
-					{
-						outputImp.changes = false;
-						outputImp.close();
-					}
-					outputImp = ImageJFunctions.wrap( output, "Output" );
-					useGlasbeyDarkLUT( outputImp );
 					outputImp.resetDisplayRange();
 					outputImp.show();
 				}
