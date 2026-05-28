@@ -45,8 +45,7 @@ import net.imglib2.FinalInterval;
 import net.imglib2.Interval;
 import net.imglib2.Localizable;
 import net.imglib2.Positionable;
-import net.imglib2.algorithm.util.Grids;
-import net.imglib2.algorithm.util.Grids.CreateAndCropBlockToFitInterval;
+import net.imglib2.util.Intervals;
 
 /**
  * Taken from net.imglib2.algorithm.util.Grids because I did not want to pull
@@ -258,5 +257,58 @@ public class Grids2
 					setOffsetForDimension.set( min[ d ], d );
 			}
 		}
+	}
+
+	/**
+	 *
+	 * @author Philipp Hanslovsky
+	 *
+	 *         Map the minimum of block to an interval specified by said minimum
+	 *         and a block size such that the maximum of the interval is no
+	 *         larger than {@code max} for any dimensions.
+	 *
+	 */
+	public static class CreateAndCropBlockToFitInterval implements Function< long[], Interval >
+	{
+
+		private final int[] blockSize;
+
+		private final long[] max;
+
+		/**
+		 *
+		 * @param blockSize
+		 *            Regular size for intervals.
+		 * @param max
+		 *            Upper bound for intervals.
+		 */
+		public CreateAndCropBlockToFitInterval( final int[] blockSize, final long[] max )
+		{
+			super();
+			this.blockSize = blockSize;
+			this.max = max;
+		}
+
+		/**
+		 * Convenience constructor for {@link Interval}. Delegates to
+		 * {@link CreateAndCropBlockToFitInterval#CreateAndCropBlockToFitInterval(int[], long[])}
+		 * using {@code max = Intervals.maxAsLongArray( interval )}.
+		 *
+		 * @param blockSize
+		 * @param interval
+		 */
+		public CreateAndCropBlockToFitInterval( final int[] blockSize, final Interval interval )
+		{
+			this( blockSize, Intervals.maxAsLongArray( interval ) );
+		}
+
+		@Override
+		public Interval apply( final long[] min )
+		{
+			final long[] max = new long[ min.length ];
+			Arrays.setAll( max, d -> Math.min( min[ d ] + this.blockSize[ d ] - 1, this.max[ d ] ) );
+			return new FinalInterval( min, max );
+		}
+
 	}
 }
