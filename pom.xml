@@ -77,16 +77,16 @@
 	</mailingLists>
 
 	<scm>
-		<connection>scm:git:git://github.com/Image-Analysis-Hub/imglib2-cellpose</connection>
+		<connection>scm:git:git://github.com/imglib/imglib2-cellpose</connection>
 		<developerConnection>
-			scm:git:git@github.com:Image-Analysis-Hub/imglib2-cellpose</developerConnection>
+			scm:git:git@github.com:imglib/imglib2-cellpose</developerConnection>
 		<tag>Cellpose_Appose-0.1.6</tag>
-		<url>https://github.com/Image-Analysis-Hub/imglib2-cellpose</url>
+		<url>https://github.com/imglib/imglib2-cellpose</url>
 	</scm>
 
 	<issueManagement>
 		<system>GitHub Issues</system>
-		<url>https://github.com/Image-Analysis-Hub/imglib2-cellpose/issues</url>
+		<url>https://github.com/imglib/imglib2-cellpose/issues</url>
 	</issueManagement>
 	<ciManagement>
 		<system>None</system>
