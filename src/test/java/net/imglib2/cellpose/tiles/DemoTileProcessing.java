@@ -1,4 +1,4 @@
-package net.imglib2.cellpose;
+package net.imglib2.cellpose.tiles;
 
 import java.awt.Color;
 import java.io.BufferedReader;
@@ -21,7 +21,12 @@ import net.imglib2.Cursor;
 import net.imglib2.FinalDimensions;
 import net.imglib2.Interval;
 import net.imglib2.appose.ShmImg;
-import net.imglib2.cellpose.tiles.Grids2;
+import net.imglib2.cellpose.ApposeTaskListener;
+import net.imglib2.cellpose.AxisInfo;
+import net.imglib2.cellpose.Cellpose;
+import net.imglib2.cellpose.Cellpose3BuiltinModels;
+import net.imglib2.cellpose.Cellpose3Parameters;
+import net.imglib2.cellpose.CellposeRunner;
 import net.imglib2.img.Img;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.type.NativeType;

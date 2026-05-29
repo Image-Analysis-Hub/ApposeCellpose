@@ -30,7 +30,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
-package net.imglib2.cellpose.tiles;
+package net.imglib2.cellpose;
 
 import static org.junit.Assert.assertEquals;
 
@@ -44,13 +44,6 @@ import org.junit.Test;
 import net.imglib2.Dimensions;
 import net.imglib2.FinalInterval;
 import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.cellpose.ApposeTaskListener;
-import net.imglib2.cellpose.AxisInfo;
-import net.imglib2.cellpose.Cellpose;
-import net.imglib2.cellpose.Cellpose3BuiltinModels;
-import net.imglib2.cellpose.Cellpose3Parameters;
-import net.imglib2.cellpose.Cellpose4Parameters;
-import net.imglib2.cellpose.CellposeOutput;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
