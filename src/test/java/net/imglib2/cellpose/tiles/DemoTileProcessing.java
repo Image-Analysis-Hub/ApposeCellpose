@@ -24,7 +24,8 @@ import net.imglib2.appose.ShmImg;
 import net.imglib2.cellpose.ApposeTaskListener;
 import net.imglib2.cellpose.AxisInfo;
 import net.imglib2.cellpose.Cellpose;
-import net.imglib2.cellpose.Cellpose4Parameters;
+import net.imglib2.cellpose.Cellpose3BuiltinModels;
+import net.imglib2.cellpose.Cellpose3Parameters;
 import net.imglib2.cellpose.CellposeRunner;
 import net.imglib2.img.Img;
 import net.imglib2.img.display.imagej.ImageJFunctions;
@@ -60,19 +61,20 @@ public class DemoTileProcessing
 			useGlasbeyDarkLUT( merged.getChannelProcessor() );
 
 			// Cellpose config.
-			/**final Cellpose3Parameters params = Cellpose3Parameters.builder()
+			final Cellpose3Parameters params = Cellpose3Parameters.builder()
 					.model( Cellpose3BuiltinModels.NUCLEI )
 					.diameter( 60.0 )
 					.resample( true )
-					.build();*/
-			final Cellpose4Parameters params = Cellpose4Parameters.builder()
-					.resample( true )
 					.build();
+//			final Cellpose4Parameters params = Cellpose4Parameters.builder()
+//					.resample( true )
+//					.build();
 			
 			// Tiles.
-			final int[] blockSize = new int[] { 512, 512 };
-			final FinalDimensions blockDims = new FinalDimensions( blockSize );
-			final List< Interval > chunks = Grids2.collectAllContainedIntervals( img.dimensionsAsLongArray(), blockSize );
+			final int blockSize = 512;
+			final int overlap = 20;
+			final List< Interval > chunks = Grids3.padWithOverlap( img, blockSize, overlap );
+			final FinalDimensions blockDims = new FinalDimensions( blockSize, blockSize );
 
 			// Process.
 			final long start = System.currentTimeMillis();
