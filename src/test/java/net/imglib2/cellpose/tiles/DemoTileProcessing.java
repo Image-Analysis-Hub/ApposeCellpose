@@ -75,7 +75,7 @@ public class DemoTileProcessing
 			// Tiles.
 			final int blockSize = 512;
 			final int overlap = 20;
-			final List< Interval > chunks = Grids3.padWithOverlap( img, blockSize, overlap );
+			final List< Interval > chunks = Grids.padWithOverlap( img, blockSize, overlap );
 			final FinalDimensions blockDims = new FinalDimensions( blockSize, blockSize );
 
 			// Label tile merger.

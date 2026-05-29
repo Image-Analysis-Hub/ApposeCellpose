@@ -8,7 +8,7 @@ import net.imglib2.Interval;
 import net.imglib2.util.Intervals;
 import net.imglib2.util.Util;
 
-public class Grids3
+public class Grids
 {
 
 	/**
