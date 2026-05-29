@@ -67,6 +67,9 @@ public class DemoTileProcessing
 			merged.setC( 2 );
 			useGlasbeyDarkLUT( merged.getChannelProcessor() );
 
+			// Wait for the user to click OK before starting the processing.
+			IJ.showMessage( "Click OK to start Cellpose tile processing demo." );
+
 			// Cellpose config.
 			final Cellpose3Parameters params = Cellpose3Parameters.builder()
 					.model( Cellpose3BuiltinModels.NUCLEI )
