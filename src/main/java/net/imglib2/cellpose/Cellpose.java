@@ -491,7 +491,7 @@ public class Cellpose
 	 * @throws TaskException
 	 *             if executing the Python script fails.
 	 */
-	public static < T extends RealType< T > & NativeType< T >, R extends IntegerType< R > & NativeType< R > > CellposeRunner< T, R > cellpose3Runner(
+	public static < T extends RealType< T > & NativeType< T >, R extends IntegerType< R > & NativeType< R > > CellposeRunner< T, R > cellposeRunner(
 			final Cellpose3Parameters params,
 			final ApposeTaskListener listener,
 			final ShmImg< T > input,
@@ -572,7 +572,7 @@ public class Cellpose
 	 * @throws TaskException
 	 *             if executing the Python script fails.
 	 */
-	public static < T extends RealType< T > & NativeType< T >, R extends IntegerType< R > & NativeType< R > > CellposeRunner< T, R > cellpose4Runner(
+	public static < T extends RealType< T > & NativeType< T >, R extends IntegerType< R > & NativeType< R > > CellposeRunner< T, R > cellposeRunner(
 			final Cellpose4Parameters params,
 			final ApposeTaskListener listener,
 			final ShmImg< T > input,

@@ -24,8 +24,6 @@ import net.imglib2.appose.ShmImg;
 import net.imglib2.cellpose.ApposeTaskListener;
 import net.imglib2.cellpose.AxisInfo;
 import net.imglib2.cellpose.Cellpose;
-import net.imglib2.cellpose.Cellpose3BuiltinModels;
-import net.imglib2.cellpose.Cellpose3Parameters;
 import net.imglib2.cellpose.Cellpose4Parameters;
 import net.imglib2.cellpose.CellposeRunner;
 import net.imglib2.img.Img;
@@ -85,7 +83,7 @@ public class DemoTileProcessing
 					final ShmImg< T > cellposeInputData = Cellpose.createInputShmImg( blockDims, img.getType() );
 					final ShmImg< UnsignedShortType > cellposeOutputData = Cellpose.createOutputLabelsShmImg( blockDims, axisInfo, new UnsignedShortType() );
 					// The runner.
-					final CellposeRunner< T, UnsignedShortType > runner = Cellpose.cellpose4Runner(
+					final CellposeRunner< T, UnsignedShortType > runner = Cellpose.cellposeRunner(
 							params,
 							ApposeTaskListener.STD,
 							cellposeInputData,
