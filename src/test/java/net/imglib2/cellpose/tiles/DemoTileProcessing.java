@@ -67,7 +67,7 @@ public class DemoTileProcessing
 			useLUT( merged.getChannelProcessor(), LUT.createLutFromColor( Color.WHITE ) );
 			merged.setC( 2 );
 			useGlasbeyDarkLUT( merged.getChannelProcessor() );
-			merged.setDisplayRange( 0, 500 );
+			merged.setDisplayRange( 0, 250 );
 
 			// Wait for the user to click OK before starting the processing.
 			IJ.showMessage( "Click OK to start Cellpose tile processing demo." );
@@ -127,14 +127,17 @@ public class DemoTileProcessing
 							// Process the group of tiles.
 							for ( final Interval tileInterval : group )
 							{
+
 								// Input tile -> Cellpose input data location.
 								copyInput( img, cellposeInputData, tileInterval );
 
 								// Run Cellpose.
 								runner.run();
 
-								// Copy at most the size of the interval from
-								// the cellpose output data.
+								// For display: separate closed label id
+								LabelShuffleUtil.shuffleLabelsInPlace( cellposeOutputData );
+
+								// Copy at most the size of the interval from the cellpose output data.
 								merger.addTile( cellposeOutputData, tileInterval );
 
 								// Cellpose output tile -> output ImagePlus.
@@ -162,8 +165,12 @@ public class DemoTileProcessing
 			// Merge all tiles and display results.
 			merger.finish();
 
+			// For display: separate closed label id
+			LabelShuffleUtil.shuffleLabelsInPlace( canvas );
+
 			// Copy final merged labels to the output ImagePlus.
 			copyOutput( canvas, merged, canvas );
+			merged.setDisplayRange( 0, 500 );
 			merged.updateAndDraw();
 		}
 		catch ( final Exception e )
