@@ -5,7 +5,12 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import org.apposed.appose.BuildException;
 import org.apposed.appose.TaskException;
@@ -73,9 +78,10 @@ public class DemoTileProcessing
 //					.build();
 
 			// Tiles.
-			final int blockSize = 512;
+			final int blockSize = 256;
 			final int overlap = 20;
 			final List< Interval > chunks = Grids.padWithOverlap( img, blockSize, overlap );
+			Collections.shuffle( chunks ); // Random order.
 			final FinalDimensions blockDims = new FinalDimensions( blockSize, blockSize );
 
 			// Label tile merger.
@@ -83,47 +89,68 @@ public class DemoTileProcessing
 			final RandomAccessibleInterval< UnsignedShortType > canvas = ArrayImgs.unsignedShorts( img.dimensionsAsLongArray() );
 			final LabelTileMerger< UnsignedShortType > merger = new LabelTileMerger<>( canvas, iouThresh );
 
-			// Process.
+			// Concurrent processing with Cellpose and tile merging.
+			final int nThreads = 4;
+			// Split the files in groups.
+			final List< List< Interval > > groups = Grids.splitIntoGroups( chunks, nThreads );
+
+			// Process concurrently.
 			final long start = System.currentTimeMillis();
 			final AxisInfo axisInfo = AxisInfo.XY;
-			// Try-with-resources with auto-closeable ShmImgs and CellposeRunner.
-			try (
-					// Placeholders for tile processing.
-					final ShmImg< T > cellposeInputData = Cellpose.createInputShmImg( blockDims, img.getType() );
-					final ShmImg< UnsignedShortType > cellposeOutputData = Cellpose.createOutputLabelsShmImg( blockDims, axisInfo, new UnsignedShortType() );
-					// The runner.
-					final CellposeRunner< T, UnsignedShortType > runner = Cellpose.cellposeRunner(
-							params,
-							ApposeTaskListener.VOID,
-							cellposeInputData,
-							axisInfo,
-							cellposeOutputData,
-							null );)
+			final ExecutorService executor = Executors.newFixedThreadPool( nThreads );
+			try
 			{
-				// Init runner.
-				runner.init();
-
-				// Process tiles.
-				for ( final Interval tileInterval : chunks )
+				final List< Future< ? > > futures = new ArrayList<>();
+				for ( final List< Interval > group : groups )
 				{
-					// Input tile -> Cellpose input data location.
-					copyInput( img, cellposeInputData, tileInterval );
+					futures.add( executor.submit( () -> {
+						try (
+								// Placeholders for tile processing.
+								final ShmImg< T > cellposeInputData = Cellpose.createInputShmImg( blockDims, img.getType() );
+								final ShmImg< UnsignedShortType > cellposeOutputData = Cellpose.createOutputLabelsShmImg( blockDims, axisInfo, new UnsignedShortType() );
+								// The runner.
+								final CellposeRunner< T, UnsignedShortType > runner = Cellpose.cellposeRunner(
+										params,
+										ApposeTaskListener.VOID,
+										cellposeInputData,
+										axisInfo,
+										cellposeOutputData,
+										null );)
+						{
+							runner.init();
 
-					// Run Cellpose.
-					runner.run();
+							// Process the group of tiles.
+							for ( final Interval tileInterval : group )
+							{
+								// Input tile -> Cellpose input data location.
+								copyInput( img, cellposeInputData, tileInterval );
 
-					// Copy at most the size of the interval from the cellpose output data.
-					merger.addTile( cellposeOutputData, tileInterval );
+								// Run Cellpose.
+								runner.run();
 
-					// Cellpose output tile -> output ImagePlus.
-					// This is justto have a pretty display of the live process.
-					copyOutput( cellposeOutputData, merged, tileInterval );
-					merged.resetDisplayRange();
-					merged.updateAndDraw();
+								// Copy at most the size of the interval from
+								// the cellpose output data.
+								merger.addTile( cellposeOutputData, tileInterval );
+
+								// Cellpose output tile -> output ImagePlus.
+								copyOutput( cellposeOutputData, merged, tileInterval );
+								merged.resetDisplayRange();
+								merged.updateAndDraw();
+							}
+						}
+						catch ( final Exception e )
+						{
+							throw new RuntimeException( e );
+						}
+					} ) );
 				}
+
+				for ( final Future< ? > f : futures )
+					f.get(); // wait and propagate exceptions
 			}
 			finally
 			{
+				executor.shutdown();
 				final long end = System.currentTimeMillis();
 				System.out.println( String.format( "Done in: %.2f seconds", ( end - start ) / 1000. ) );
 			}
@@ -154,7 +181,7 @@ public class DemoTileProcessing
 	 *            the tile interval defining the location of the tile in the
 	 *            output ImagePlus
 	 */
-	private static void copyOutput( final ShmImg< UnsignedShortType > output, final ImagePlus target, final Interval interval )
+	private static synchronized void copyOutput( final ShmImg< UnsignedShortType > output, final ImagePlus target, final Interval interval )
 	{
 		// Basic copy to the output ImagePlus.
 		final Cursor< UnsignedShortType > c = output.localizingCursor();

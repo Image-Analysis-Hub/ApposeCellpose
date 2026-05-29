@@ -106,6 +106,10 @@ public class LabelTileMerger< R extends IntegerType< R > >
 	 * / canvas coordinates according to {@code interval}, written into empty
 	 * canvas pixels, and matched against existing canvas labels in overlap
 	 * regions.
+	 * <p>
+	 * This method is <code>synchronized</code> to allow calls from multiple
+	 * threads, but each call will be processed sequentially. This is required
+	 * to maintain a consistent merger state.
 	 *
 	 * @param inputTile
 	 *            label tile to merge. The input tile is not modified by this
@@ -119,7 +123,7 @@ public class LabelTileMerger< R extends IntegerType< R > >
 	 * @throws IllegalStateException
 	 *             if {@code finish()} has already been called.
 	 */
-	public < T extends IntegerType< T > > void addTile( final RandomAccessibleInterval< T > inputTile, final Interval interval )
+	public synchronized < T extends IntegerType< T > > void addTile( final RandomAccessibleInterval< T > inputTile, final Interval interval )
 	{
 		if ( finished )
 			throw new IllegalStateException( "Cannot add tile after finish() has been called." );

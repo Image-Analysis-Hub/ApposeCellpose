@@ -159,4 +159,25 @@ public class Grids
 		for ( final Interval block : blocks )
 			System.out.println( Util.printInterval( block ) );
 	}
+
+	/**
+	 * Splits a list of intervals into {@code n} groups, by assigning intervals
+	 * to groups in a round-robin fashion. This is useful to distribute
+	 * intervals to multiple threads for parallel processing.
+	 * 
+	 * @param chunks
+	 *            the list of intervals to split into groups.
+	 * @param n
+	 *            the number of groups to split into.
+	 * @return a list of {@code n} groups, each group being a list of intervals.
+	 */
+	public static List< List< Interval > > splitIntoGroups( final List< Interval > chunks, final int n )
+	{
+		final List< List< Interval > > groups = new ArrayList<>();
+		for ( int i = 0; i < n; i++ )
+			groups.add( new ArrayList<>() );
+		for ( int i = 0; i < chunks.size(); i++ )
+			groups.get( i % n ).add( chunks.get( i ) );
+		return groups;
+	}
 }
