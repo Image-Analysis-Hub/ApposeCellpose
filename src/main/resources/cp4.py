@@ -168,7 +168,10 @@ else:
 
 # load images
 if appose_mode:
-    fiji_image = globals()['image']
+    fiji_image = globals()['input']
+    fiji_output_labels = globals()['output_labels']
+    fiji_output_flows = globals()['output_flows']
+
     stitch_threshold = globals()['stitch_threshold']
     z_axis: int | None = globals()['z_axis']
     channel_axis: int | None = globals()['channel_axis']
@@ -189,6 +192,8 @@ if appose_mode:
 
     
     input_image = fiji_image.ndarray()  # pylint: disable=E1120
+    output_labels = fiji_output_labels.ndarray()
+    output_flows = fiji_output_flows.ndarray() if fiji_output_flows is not None else None    
     anisotropy = anisotropy if anisotropy > 0 else None
     
     if channel_axis is not None:
@@ -281,9 +286,10 @@ if compute_flows:
 # task.update(message=f'Z axis: {z_axis}, Time axis: {time_axis}')
 
 if appose_mode:
-    task.outputs["labels"] = share_as_ndarray(masks)
+    # Write masks into the shared output image.
+    output_labels[:] = masks
     if compute_flows:
-        task.outputs["flows"] = share_as_ndarray(flows)
+        output_flows[:] = flows
 else:
     save_path = os.path.join(sample_folder, test_file.replace('.tif', '_masks.tif'))
     io.imsave(save_path, masks.astype(np.uint16))

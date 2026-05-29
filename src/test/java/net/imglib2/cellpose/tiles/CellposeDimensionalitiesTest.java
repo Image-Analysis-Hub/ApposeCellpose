@@ -30,7 +30,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
-package net.imglib2.cellpose;
+package net.imglib2.cellpose.tiles;
 
 import static org.junit.Assert.assertEquals;
 
@@ -333,7 +333,7 @@ public class CellposeDimensionalitiesTest
 				.build();
 		test( cellpose4Runner( params ), CellposeTestDims.XYCZ );
 	}
-	
+
 	@Test
 	public void testCellpose3_XYCZ_NoStich_Mode3D()
 	{
@@ -344,7 +344,7 @@ public class CellposeDimensionalitiesTest
 				.build();
 		test( cellpose3Runner( params ), CellposeTestDims.XYCZ );
 	}
-	
+
 	@Test
 	public void testCellpose3_XYCZT_NoStich_Mode3D()
 	{
@@ -393,7 +393,7 @@ public class CellposeDimensionalitiesTest
 		return ( img, axes ) -> {
 			try
 			{
-				return Cellpose.cellpose3( img, axes, params, ApposeTaskListener.STD );
+				return Cellpose.cellpose3( img, axes, new UnsignedShortType(), params, ApposeTaskListener.STD );
 			}
 			catch ( BuildException | IOException | InterruptedException | TaskException e )
 			{
@@ -408,7 +408,7 @@ public class CellposeDimensionalitiesTest
 		return ( img, axes ) -> {
 			try
 			{
-				return Cellpose.cellpose4( img, axes, params, ApposeTaskListener.STD );
+				return Cellpose.cellpose4( img, axes, new UnsignedShortType(), params, ApposeTaskListener.STD );
 			}
 			catch ( BuildException | IOException | InterruptedException | TaskException e )
 			{
@@ -592,7 +592,7 @@ public class CellposeDimensionalitiesTest
 				System.out.println( '\n' + dims.axes.toString() );
 				System.out.println( "Testing case " + dims.name() );
 
-				final CellposeOutput< ? > output = Cellpose.cellpose3( img, dims.axes, params, ApposeTaskListener.STD );
+				final CellposeOutput< UnsignedShortType > output = Cellpose.cellpose3( img, dims.axes, new UnsignedShortType(), params, ApposeTaskListener.STD );
 
 				System.out.println( "\nInput shape:           " + Util.printInterval( img ) );
 				System.out.println( "Get Labels with shape: " + Util.printInterval( output.labels ) );

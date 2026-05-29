@@ -41,21 +41,16 @@ import org.apache.commons.io.IOUtils;
 import org.apposed.appose.Appose;
 import org.apposed.appose.BuildException;
 import org.apposed.appose.Environment;
-import org.apposed.appose.NDArray;
 import org.apposed.appose.Service;
 import org.apposed.appose.Service.Task;
 import org.apposed.appose.Service.TaskStatus;
 import org.apposed.appose.TaskException;
 
-import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.appose.ShmImg;
-import net.imglib2.img.Img;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.IntegerType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
-import net.imglib2.util.ImgUtil;
-import net.imglib2.view.Views;
 
 /**
  * Specialized class that runs Cellpose. This class exists so that we can write
@@ -68,68 +63,82 @@ import net.imglib2.view.Views;
  * data structure. This class is made to support this approach.
  * 
  */
-class CellposeRunner implements AutoCloseable
+public class CellposeRunner< T extends RealType< T > & NativeType< T >, R extends IntegerType< R > & NativeType< R > > implements AutoCloseable
 {
 
 	private final String envName;
-
-	private final CellposeParameters params;
 
 	private final String pythonScriptPath;
 
 	private final ApposeTaskListener listener;
 
+	private final Map< String, Object > inputsParams;
+
 	private Service python;
 
 	private String cellposeScript;
 
-	public CellposeRunner( final CellposeParameters params,
+
+	/**
+	 * Instantiates a Cellpose runner.
+	 * 
+	 * @param params
+	 *            the Cellpose parameters to use for running Cellpose.
+	 * @param pythonScriptPath
+	 *            the path to the Cellpose Python script.
+	 * @param envName
+	 *            the name of the Cellpose Python environment to use.
+	 * @param listener
+	 *            the listener to use for receiving updates from the Python
+	 *            script and environment deployment.
+	 * @param input
+	 *            a placeholder for the input image. Every <code>run()</code>
+	 *            call use the image data written in this placeholder.
+	 * @param inputAxisInfo
+	 *            the axis info of the input image. Will be used for every call
+	 *            to <code>run()</code>.
+	 * @param outputLabels
+	 *            a placeholder for the output labels image. Every
+	 *            <code>run()</code> call writes the labels results in this
+	 *            placeholder. It is the caller responsibility to ensure that
+	 *            this placeholder has the right dimensions and pixel type.
+	 * @param outputFlows
+	 *            a placeholder for the output flows image. Every
+	 *            <code>run()</code> call writes the flows results in this
+	 *            placeholder. It is the caller responsibility to ensure that
+	 *            this placeholder has the right dimensions. Can be
+	 *            <code>null</code> if flows are not computed.
+	 */
+	CellposeRunner( final CellposeParameters params,
 			final String pythonScriptPath,
 			final String envName,
-			final ApposeTaskListener listener )
+			final ApposeTaskListener listener,
+			final ShmImg< T > input,
+			final AxisInfo inputAxisInfo,
+			final ShmImg< R > outputLabels,
+			final ShmImg< UnsignedByteType > outputFlows )
 	{
-		this.params = params;
 		this.pythonScriptPath = pythonScriptPath;
 		this.envName = envName;
 		this.listener = listener;
+		this.inputsParams = params.toApposeMap( input, inputAxisInfo, outputLabels, outputFlows );
 	}
 
 	/**
-	 * Runs Cellpose on the given input image, and writes the output to the
-	 * given output object. If the output object is <code>null</code>, a new one
-	 * will be created and returned.
+	 * Runs Cellpose on the input image currently written in the input
+	 * placeholder, and writes the results in the output placeholders, with the
+	 * parameters specified at construction time.
 	 * 
-	 * @param <T>
-	 *            the pixel type of the input image.
-	 * @param <R>
-	 *            the pixel type of the output labels image. Can be either
-	 *            UnsignedIntType or UnsignedLongType, depending on the expected
-	 *            number of cells.
-	 * @param input
-	 *            the input image.
-	 * @param output
-	 *            the output object to write results to. If <code>null</code>, a
-	 *            new one will be created and returned.
-	 * @param listener
-	 * @return the output of Cellpose, containing the labels and possibly flows.
-	 *         If the output object was provided, it will be returned after
-	 *         being updated with the new results.
 	 * @throws InterruptedException
 	 *             if the thread is interrupted while waiting for the Python
 	 *             script to finish.
 	 * @throws TaskException
 	 *             if executing the Python script fails.
 	 */
-	public < T extends RealType< T > & NativeType< T >, R extends IntegerType< R > & NativeType< R > > CellposeOutput< R > run(
-			final RandomAccessibleInterval< T > input,
-			final AxisInfo axisInfo,
-			final CellposeOutput< R > output ) throws InterruptedException, TaskException
+	public void run() throws InterruptedException, TaskException
 	{
-		// Inputs.
-		final Map< String, Object > inputs = params.toApposeMap( input, axisInfo );
-
 		// The Python task.
-		final Task task = python.task( cellposeScript, inputs );
+		final Task task = python.task( cellposeScript, inputsParams );
 
 		final long start = System.currentTimeMillis();
 		// To catch update message from the python script
@@ -145,37 +154,6 @@ class CellposeRunner implements AutoCloseable
 		// Benchmark.
 		final long end = System.currentTimeMillis();
 		listener.message( "Cellpose finished in " + ( end - start ) / 1000. + " s" );
-
-		// Unwrap and process outputs.
-		final NDArray labelsArr = ( NDArray ) task.outputs.get( "labels" );
-		final Img< R > labels = new ShmImg<>( labelsArr );
-		final AxisInfo axesLabels = axisInfo.removeChannelDim();
-
-		if ( params.computeFlows )
-		{
-			final NDArray flowsArr = ( NDArray ) task.outputs.get( "flows" );
-			final Img< UnsignedByteType > flows = new ShmImg<>( flowsArr );
-			final AxisInfo axesFlows = axesLabels.insertChannelDim( 2 );
-			if ( output != null )
-			{
-				ImgUtil.copy( labels, output.labels );
-				ImgUtil.copy( flows, output.flows );
-				return output;
-			}
-			return new CellposeOutput<>( labels, axesLabels, flows, axesFlows );
-		}
-
-		if ( output != null )
-		{
-			// Drop the time singleton dimension for writing into output.
-			final RandomAccessibleInterval< R > labelsView = Views.hyperSlice( labels, 4, 0 );
-
-			// Write the new labels to the provided output object.
-			ImgUtil.copy( labelsView, output.labels );
-			return output;
-		}
-		return new CellposeOutput<>( labels, axesLabels );
-
 	}
 
 	/**

@@ -62,7 +62,8 @@ def manage_channels_index(cell: int | None = None, nuclei: int | None = None) ->
 ###############################################################################
 
 def run_cellpose_v3(img: np.ndarray, kwargs: dict) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """Runs Cellpose v3 on a single image with the given parameters. Refer to Cellpose documentation for kwargs list."""
+    """Runs Cellpose v3 on a single image with the given parameters. 
+    Refer to Cellpose documentation for kwargs list.    """
 
     # Manage pretrained model and model type selection based on user inputs
     # - Prioritize custom model if provided
@@ -143,7 +144,10 @@ else:
 
 # load arguments and input from Appose task
 if appose_mode:
-    fiji_image = globals()['image']
+    fiji_image = globals()['input']
+    fiji_output_labels = globals()['output_labels']
+    fiji_output_flows = globals()['output_flows']
+    
     cell_channel_index: int | None = globals()['cell_channel']
     nuclei_channel_index: int | None = globals()['nuclei_channel']
     stitch_threshold: float = globals()['stitch_threshold']
@@ -155,6 +159,9 @@ if appose_mode:
     use_gpu: bool = globals()['use_gpu']
 
     input_image = fiji_image.ndarray()
+    output_labels = fiji_output_labels.ndarray()
+    output_flows = fiji_output_flows.ndarray() if fiji_output_flows is not None else None
+    
     channels = manage_channels_index(cell_channel_index, nuclei_channel_index)
     anisotropy = anisotropy if anisotropy > 0 else None
 
@@ -240,9 +247,10 @@ if compute_flows:
 #     message=f"CP3: Returning results (after flip: labels shape={masks.shape}, flows shape={flows.shape if compute_flows else 'N/A'})")
 
 if appose_mode:
-    task.outputs["labels"] = share_as_ndarray(masks)
+    # Write masks into the shared output image.
+    output_labels[:] = masks
     if compute_flows:
-        task.outputs["flows"] = share_as_ndarray(flows)
+        output_flows[:] = flows
 else:
     save_path = os.path.join(sample_folder, test_file.replace('.tif', '_masks.tif'))
     io.imsave(save_path, masks.astype(np.uint16))
@@ -255,3 +263,6 @@ task.update(
     maximum = 5,
     message=f"CP3: Cellpose processing completed"
 )
+
+# %%
+ 

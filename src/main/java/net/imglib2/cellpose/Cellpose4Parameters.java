@@ -34,9 +34,11 @@ package net.imglib2.cellpose;
 
 import java.util.Map;
 
-import net.imglib2.RandomAccessibleInterval;
+import net.imglib2.appose.ShmImg;
 import net.imglib2.type.NativeType;
+import net.imglib2.type.numeric.IntegerType;
 import net.imglib2.type.numeric.RealType;
+import net.imglib2.type.numeric.integer.UnsignedByteType;
 
 public class Cellpose4Parameters extends CellposeParameters
 {
@@ -78,22 +80,16 @@ public class Cellpose4Parameters extends CellposeParameters
 		this.chan2 = chan2;
 	}
 
-	/**
-	 * Creates a parameters map suitable for passing to Appose, using the
-	 * specified image as input, and the parameter values stored in this object.
-	 * 
-	 * @param <T>
-	 *            the pixel type of the input image.
-	 * @param img
-	 *            the input image.
-	 * @return a new map.
-	 */
 	@Override
-	public < T extends RealType< T > & NativeType< T > > Map< String, Object > toApposeMap( final RandomAccessibleInterval< T > img, final AxisInfo axisInfo )
+	public < T extends RealType< T > & NativeType< T >, R extends IntegerType< R > & NativeType< R > > Map< String, Object > toApposeMap(
+			final ShmImg< T > input,
+			final AxisInfo axisInfo,
+			final ShmImg< R > outputLabels,
+			final ShmImg< UnsignedByteType > outputFlows )
 	{
-		final Map< String, Object > inputs = super.toApposeMap( img, axisInfo );
+		final Map< String, Object > inputs = super.toApposeMap( input, axisInfo, outputLabels, outputFlows );
 
-		final long nChannels = axisInfo.nChannels( img );
+		final long nChannels = axisInfo.nChannels( input );
 		inputs.put( "n_channels", nChannels );
 		inputs.put( "chan0", chan0 );
 		inputs.put( "chan1", chan1 );
