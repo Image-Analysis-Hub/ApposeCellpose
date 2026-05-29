@@ -5,7 +5,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apposed.appose.BuildException;
@@ -20,7 +19,6 @@ import ij.process.ImageProcessor;
 import ij.process.LUT;
 import net.imglib2.Cursor;
 import net.imglib2.FinalDimensions;
-import net.imglib2.FinalInterval;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.appose.ShmImg;
@@ -37,7 +35,6 @@ import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.util.ImgUtil;
-import net.imglib2.util.Util;
 import net.imglib2.view.fluent.RandomAccessibleIntervalView;
 
 public class DemoTileProcessing
@@ -81,14 +78,15 @@ public class DemoTileProcessing
 			final List< Interval > chunks = Grids3.padWithOverlap( img, blockSize, overlap );
 			final FinalDimensions blockDims = new FinalDimensions( blockSize, blockSize );
 
-			// Label tiles.
-			final List< RandomAccessibleInterval< UnsignedShortType > > labelTiles = new ArrayList<>();
+			// Label tile merger.
+			final double iouThresh = 0.1;
+			final RandomAccessibleInterval< UnsignedShortType > canvas = ArrayImgs.unsignedShorts( img.dimensionsAsLongArray() );
+			final LabelTileMerger< UnsignedShortType > merger = new LabelTileMerger<>( canvas, iouThresh );
 
 			// Process.
 			final long start = System.currentTimeMillis();
 			final AxisInfo axisInfo = AxisInfo.XY;
-			// Try-with-resources with auto-closeable ShmImgs and
-			// CellposeRunner.
+			// Try-with-resources with auto-closeable ShmImgs and CellposeRunner.
 			try (
 					// Placeholders for tile processing.
 					final ShmImg< T > cellposeInputData = Cellpose.createInputShmImg( blockDims, img.getType() );
@@ -114,24 +112,14 @@ public class DemoTileProcessing
 					// Run Cellpose.
 					runner.run();
 
+					// Copy at most the size of the interval from the cellpose output data.
+					merger.addTile( cellposeOutputData, tileInterval );
+
 					// Cellpose output tile -> output ImagePlus.
+					// This is justto have a pretty display of the live process.
 					copyOutput( cellposeOutputData, merged, tileInterval );
 					merged.resetDisplayRange();
 					merged.updateAndDraw();
-
-					// Store into label tiles.
-					final RandomAccessibleInterval< UnsignedShortType > labelTile = ArrayImgs.unsignedShorts( tileInterval.dimensionsAsLongArray() );
-
-					// Copy at most the size of the interval from the cellpose
-					// output data.
-					ImgUtil.copy(
-							cellposeOutputData
-									.view()
-									.interval( FinalInterval.createMinSize(
-											Util.getArrayFromValue( 0l, tileInterval.numDimensions() ),
-											tileInterval.dimensionsAsLongArray() ) ),
-							labelTile );
-					labelTiles.add( labelTile );
 				}
 			}
 			finally
@@ -140,10 +128,8 @@ public class DemoTileProcessing
 				System.out.println( String.format( "Done in: %.2f seconds", ( end - start ) / 1000. ) );
 			}
 
-			// Merge all tiles.
-			final double iouThresh = 0.1;
-			final RandomAccessibleInterval< UnsignedShortType > canvas = ArrayImgs.unsignedShorts( img.dimensionsAsLongArray() );
-			LabelTileMerger.mergeTilesIntoCanvas( labelTiles, chunks, iouThresh, canvas );
+			// Merge all tiles and display results.
+			merger.finish();
 			final ImagePlus mergedOutput = ImageJFunctions.show( canvas, "Merged Output" );
 			useGlasbeyDarkLUT( mergedOutput.getChannelProcessor() );
 			mergedOutput.resetDisplayRange();

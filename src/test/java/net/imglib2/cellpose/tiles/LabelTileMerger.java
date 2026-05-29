@@ -2,126 +2,326 @@ package net.imglib2.cellpose.tiles;
 
 import java.util.HashMap;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import net.imglib2.Cursor;
-import net.imglib2.Dimensions;
+import net.imglib2.FinalInterval;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccess;
+import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
+import net.imglib2.loops.LoopBuilder;
 import net.imglib2.type.numeric.IntegerType;
-import net.imglib2.util.Intervals;
+import net.imglib2.view.IntervalView;
 import net.imglib2.view.Views;
 
 /**
- * Utility for stitching overlapping label-image tiles into a single canvas.
- *
+ * Incrementally merges overlapping label-image tiles into a single canvas.
  * <p>
- * Each input tile contains local instance labels, with {@code 0} representing
- * background and positive values representing object ids. Tiles are written
- * into the provided output canvas according to the corresponding world-space
- * intervals. If labeled objects overlap across tile boundaries, they are merged
- * using an overlap-based IoU criterion.
+ * Each added tile contains local instance labels, with {@code 0} as background
+ * and positive values as object ids. Tiles are written into the provided output
+ * canvas according to their world-space interval. Objects overlapping across
+ * tile boundaries are unified using an overlap-based IoU criterion.
  * <p>
- * The output canvas is modified in place.
- * </p>
+ * The canvas stores provisional global labels while tiles are being added.
+ * Calling {@link #finish()} remaps the canvas to compact final labels
+ * {@code 1..N}. After {@code finish()}, no more tiles may be added.
+ * <p>
+ * The canvas is provided as a {@link net.imglib2.RandomAccessible}, which may
+ * be bounded or unbounded. If the canvas also implements {@link Interval}, tile
+ * intervals are validated against its bounds. Otherwise, the merger assumes
+ * that all accessed tile positions are valid in the canvas. Because a
+ * {@code RandomAccessible} does not necessarily define a finite interval,
+ * {@link #finish()} relabels only the union bounding box of the tile intervals
+ * that were added, and {@link #snapshotInto(RandomAccessibleInterval)} writes
+ * only within the interval of the provided target.
+ * 
+ * @param <R>
+ *            canvas pixel type
  */
-public class LabelTileMerger
+public class LabelTileMerger< R extends IntegerType< R > >
 {
-	private LabelTileMerger()
+
+	private final RandomAccessible< R > canvas;
+
+	private final double iouThreshold;
+
+	private final UnionFind unionFind;
+
+	/**
+	 * The min of the interval that were iterated when adding tiles. This is
+	 * used to determine the full interval to relabel.
+	 */
+	private final long[] minFullInterval;
+
+	/**
+	 * The max of the interval that were iterated when adding tiles. This is
+	 * used to determine the full interval to relabel.
+	 */
+	private final long[] maxFullInterval;
+
+	private int offset;
+
+	private boolean finished;
+
+	private boolean hasTiles;
+
+	/**
+	 * Creates a new incremental label-tile merger.
+	 *
+	 * @param canvas
+	 *            output canvas, initialized to 0 and large enough to contain
+	 *            all tile intervals. Will be modified in place as tiles are
+	 *            added and when {@link #finish()} is called. Must be considered
+	 *            invalid until {@code finish()} is called, as it may contain
+	 *            provisional labels.
+	 * @param iouThreshold
+	 *            IoU threshold in [0, 1] used to merge labels across
+	 *            overlapping tiles
+	 */
+	public LabelTileMerger(
+			final RandomAccessible< R > canvas,
+			final double iouThreshold )
 	{
-		// utility class
+		if ( canvas == null )
+			throw new IllegalArgumentException( "canvas must not be null" );
+		if ( iouThreshold < 0.0 || iouThreshold > 1.0 )
+			throw new IllegalArgumentException( "iouThreshold must be in [0, 1]" );
+
+		this.canvas = canvas;
+		this.iouThreshold = iouThreshold;
+		this.unionFind = new UnionFind();
+		this.offset = 0;
+		this.finished = false;
+		this.hasTiles = false;
+		this.minFullInterval = new long[ canvas.numDimensions() ];
+		this.maxFullInterval = new long[ canvas.numDimensions() ];
 	}
 
 	/**
-	 * Merges label tiles into a single canvas, using overlap-based IoU to unify
-	 * objects crossing tile boundaries.
+	 * Adds one label tile into the merger.
+	 * <p>
+	 * The tile is assumed to contain local labels. It is translated into world
+	 * / canvas coordinates according to {@code interval}, written into empty
+	 * canvas pixels, and matched against existing canvas labels in overlap
+	 * regions.
 	 *
-	 * @param tiles
-	 *            list of label tiles
-	 * @param intervals
-	 *            world-space interval of each tile, same order as {@code tiles}
-	 * @param iouThresh
-	 *            IoU threshold in [0, 1]
-	 * @param canvas
-	 *            output canvas, initialized to 0 and large enough to contain
-	 *            all intervals
+	 * @param inputTile
+	 *            label tile to merge. The input tile is not modified by this
+	 *            method; its pixels are only read.
+	 * @param interval
+	 *            world-space interval specifying where the tile belongs in the
+	 *            canvas.
+	 * @param <T>
+	 *            tile pixel type.
+	 * 
+	 * @throws IllegalStateException
+	 *             if {@code finish()} has already been called.
 	 */
-	public static < T extends IntegerType< T >, R extends IntegerType< R > > void mergeTilesIntoCanvas(
-			final List< RandomAccessibleInterval< T > > tiles,
-			final List< Interval > intervals,
-			final double iouThresh,
-			final RandomAccessibleInterval< R > canvas )
+	public < T extends IntegerType< T > > void addTile( final RandomAccessibleInterval< T > inputTile, final Interval interval )
 	{
-		validateInputs( tiles, intervals, iouThresh, canvas );
+		if ( finished )
+			throw new IllegalStateException( "Cannot add tile after finish() has been called." );
 
-		final RandomAccess< R > canvasRA = canvas.randomAccess( canvas );
-		final UnionFind uf = new UnionFind();
+		// Detect issues.
+		validateTile( inputTile, interval, canvas );
 
-		int offset = 0;
+		// Only iterate over the interval size.
+		final RandomAccessibleInterval< T > tile = cropTileToIntervalSize( inputTile, interval );
 
-		for ( int t = 0; t < tiles.size(); t++ )
+		// Is it empty?
+		final int tileMax = maxLabel( tile );
+		if ( tileMax == 0 )
+			return;
+
+		// Update the full interval bounds.
+		if ( !hasTiles )
 		{
-			final RandomAccessibleInterval< T > tile = tiles.get( t );
-			final Interval interval = intervals.get( t );
-
-			final int tileMax = maxLabel( tile );
-			if ( tileMax == 0 )
-				continue;
-
-			for ( int lbl = 1; lbl <= tileMax; lbl++ )
-				uf.add( lbl + offset );
-
-			final RandomAccessibleInterval< T > tileInWorld = translateToInterval( tile, interval );
-
-			final Map< Integer, Integer > oldLabelCounts = new HashMap<>();
-			final Map< Integer, Integer > newLabelCounts = new HashMap<>();
-			final Map< Long, Integer > overlapCounts = new HashMap<>();
-
-			final Cursor< T > tileCursor = tileInWorld.localizingCursor();
-
-			while ( tileCursor.hasNext() )
+			for ( int d = 0; d < canvas.numDimensions(); d++ )
 			{
-				tileCursor.fwd();
-
-				final int tileLabel = tileCursor.get().getInteger();
-				if ( tileLabel == 0 )
-					continue;
-
-				final int globalNew = tileLabel + offset;
-
-				canvasRA.setPosition( tileCursor );
-				final int canvasVal = canvasRA.get().getInteger();
-
-				if ( canvasVal > 0 )
-				{
-					oldLabelCounts.merge( canvasVal, 1, Integer::sum );
-					newLabelCounts.merge( globalNew, 1, Integer::sum );
-					overlapCounts.merge( packPair( canvasVal, globalNew ), 1, Integer::sum );
-				}
-				else
-				{
-					canvasRA.get().setInteger( globalNew );
-				}
+				minFullInterval[ d ] = interval.min( d );
+				maxFullInterval[ d ] = interval.max( d );
 			}
-
-			for ( final Map.Entry< Long, Integer > e : overlapCounts.entrySet() )
+			hasTiles = true;
+		}
+		else
+		{
+			for ( int d = 0; d < canvas.numDimensions(); d++ )
 			{
-				final int oldLbl = unpackHigh( e.getKey() );
-				final int newLbl = unpackLow( e.getKey() );
-				final int intersection = e.getValue();
-				final int union = oldLabelCounts.get( oldLbl ) + newLabelCounts.get( newLbl ) - intersection;
-
-				if ( union > 0 && ( double ) intersection / union >= iouThresh )
-					uf.union( oldLbl, newLbl );
+				minFullInterval[ d ] = Math.min( minFullInterval[ d ], interval.min( d ) );
+				maxFullInterval[ d ] = Math.max( maxFullInterval[ d ], interval.max( d ) );
 			}
-
-			offset += tileMax;
 		}
 
-		relabel( canvas, uf );
+		for ( int lbl = 1; lbl <= tileMax; lbl++ )
+			unionFind.add( lbl + offset );
+
+		final RandomAccessibleInterval< T > tileInWorld = translateToInterval( tile, interval );
+
+		final Map< Integer, Integer > oldOverlapAreas = new HashMap<>();
+		final Map< Integer, Integer > newOverlapAreas = new HashMap<>();
+		final Map< Long, Integer > pairIntersections = new HashMap<>();
+
+		final Cursor< T > tileCursor = tileInWorld.localizingCursor();
+
+		final RandomAccess< R > canvasRA = canvas.randomAccess( interval );
+		while ( tileCursor.hasNext() )
+		{
+			tileCursor.fwd();
+
+			final int tileLabel = tileCursor.get().getInteger();
+			if ( tileLabel == 0 )
+				continue;
+
+			final int globalNew = tileLabel + offset;
+
+			canvasRA.setPosition( tileCursor );
+			final int canvasLabel = canvasRA.get().getInteger();
+
+			if ( canvasLabel > 0 )
+			{
+				oldOverlapAreas.merge( canvasLabel, 1, Integer::sum );
+				newOverlapAreas.merge( globalNew, 1, Integer::sum );
+				pairIntersections.merge( packPair( canvasLabel, globalNew ), 1, Integer::sum );
+			}
+			else
+			{
+				canvasRA.get().setInteger( globalNew );
+			}
+		}
+
+		for ( final Map.Entry< Long, Integer > e : pairIntersections.entrySet() )
+		{
+			final int oldLabel = unpackHigh( e.getKey() );
+			final int newLabel = unpackLow( e.getKey() );
+			final int intersection = e.getValue();
+			final int union = oldOverlapAreas.get( oldLabel ) + newOverlapAreas.get( newLabel ) - intersection;
+
+			if ( union > 0 && ( double ) intersection / union >= iouThreshold )
+				unionFind.union( oldLabel, newLabel );
+		}
+
+		offset += tileMax;
+	}
+
+	/**
+	 * Returns the subregion of {@code tile} whose dimensions match those of
+	 * {@code interval}, starting at the minimum coordinates of {@code tile}.
+	 * <p>
+	 * This is intended for the case where {@code tile} is a reusable buffer
+	 * that may be larger than the actual valid tile content. Only the leading
+	 * region of the tile, with the same dimensions as {@code interval}, is
+	 * considered valid and will be processed.
+	 * <p>
+	 * This method does not interpret {@code interval} in the coordinate system
+	 * of {@code tile}; only {@code interval.dimension(d)} is used.
+	 */
+	private static < T > RandomAccessibleInterval< T > cropTileToIntervalSize( final RandomAccessibleInterval< T > tile, final Interval interval )
+	{
+		final int n = tile.numDimensions();
+		final long[] min = new long[ n ];
+		final long[] max = new long[ n ];
+
+		for ( int d = 0; d < n; d++ )
+		{
+			min[ d ] = tile.min( d );
+			max[ d ] = tile.min( d ) + interval.dimension( d ) - 1;
+		}
+
+		return Views.interval( tile, min, max );
+	}
+
+	/**
+	 * Finalizes the merge by relabeling the canvas to compact labels
+	 * {@code 1..N}. Relabeling is restricted to the union bounding box of the
+	 * tile intervals that were added.
+	 * <p>
+	 * This operation is terminal. After it has been called, no more tiles may
+	 * be added. Repeated calls are allowed and are no-ops.
+	 */
+	public void finish()
+	{
+		if ( finished )
+			return;
+		if ( !hasTiles )
+		{
+			finished = true;
+			return;
+		}
+
+		final Interval fullInterval = new FinalInterval( minFullInterval, maxFullInterval );
+		relabelInPlace( canvas, fullInterval, unionFind );
+		finished = true;
+	}
+
+	/**
+	 * Returns whether {@link #finish()} has already been called.
+	 *
+	 * @return true if the merger has been finalized
+	 */
+	public boolean isFinished()
+	{
+		return finished;
+	}
+
+	/**
+	 * Writes a relabeled snapshot of the current merger state into
+	 * {@code target}. Only the interval of {@code target} is written.
+	 * <p>
+	 * This method does not modify the internal canvas or the merger state. It
+	 * can be used to inspect an intermediate finalized labeling before calling
+	 * {@link #finish()}. Useful for debugging.
+	 *
+	 * @param target
+	 *            output image receiving a relabeled snapshot
+	 * @param <S>
+	 *            target pixel type
+	 */
+	public < S extends IntegerType< S > > void snapshotInto( final RandomAccessibleInterval< S > target )
+	{
+		if ( isFinished() )
+		{
+			// Copy without relabeling.
+			LoopBuilder.setImages( Views.interval( canvas, target ), target )
+					.multiThreaded()
+					.forEachPixel( ( i, o ) -> o.setInteger( i.getInteger() ) );
+		}
+		else
+		{
+			copyRelabeled( canvas, target, unionFind );
+		}
+	}
+
+	private static < T extends IntegerType< T >, R extends IntegerType< R > > void validateTile(
+			final RandomAccessibleInterval< T > tile,
+			final Interval interval,
+			final RandomAccessible< R > canvas )
+	{
+		if ( tile == null )
+			throw new IllegalArgumentException( "tile must not be null" );
+		if ( interval == null )
+			throw new IllegalArgumentException( "interval must not be null" );
+
+		if ( tile.numDimensions() != interval.numDimensions() )
+			throw new IllegalArgumentException( "Tile and interval dimension mismatch" );
+		if ( tile.numDimensions() != canvas.numDimensions() )
+			throw new IllegalArgumentException( "Tile and canvas dimension mismatch" );
+		for ( int d = 0; d < tile.numDimensions(); d++ )
+		{
+			if ( tile.dimension( d ) < interval.dimension( d ) )
+				throw new IllegalArgumentException( "Tile is smaller than interval in dimension " + d );
+		}
+		// If we know that the canvas has bounds, test for it.
+		if ( canvas instanceof Interval )
+		{
+			final Interval canvasInterval = ( Interval ) canvas;
+			for ( int d = 0; d < canvas.numDimensions(); d++ )
+			{
+				if ( interval.min( d ) < canvasInterval.min( d ) || interval.max( d ) > canvasInterval.max( d ) )
+					throw new IllegalArgumentException( "Tile interval lies outside the canvas" );
+			}
+		}
 	}
 
 	private static < T > RandomAccessibleInterval< T > translateToInterval(
@@ -135,78 +335,79 @@ public class LabelTileMerger
 		return Views.translate( tile, shift );
 	}
 
-	private static < T extends IntegerType< T >, R extends IntegerType< R > > void validateInputs(
-			final List< RandomAccessibleInterval< T > > tiles,
-			final List< Interval > intervals,
-			final double iouThresh,
-			final RandomAccessibleInterval< R > canvas )
-	{
-		if ( tiles == null || intervals == null || canvas == null )
-			throw new IllegalArgumentException( "tiles, intervals, and canvas must be non-null" );
-
-		if ( tiles.size() != intervals.size() )
-			throw new IllegalArgumentException( "tiles and intervals must have the same size" );
-
-		if ( iouThresh < 0.0 || iouThresh > 1.0 )
-			throw new IllegalArgumentException( "iouThresh must be in [0, 1]" );
-
-		for ( int t = 0; t < tiles.size(); t++ )
-		{
-			final RandomAccessibleInterval< T > tile = tiles.get( t );
-			final Interval interval = intervals.get( t );
-
-			if ( tile.numDimensions() != interval.numDimensions() )
-				throw new IllegalArgumentException( "Tile and interval dimension mismatch at index " + t );
-
-			if ( tile.numDimensions() != canvas.numDimensions() )
-				throw new IllegalArgumentException( "Tile and canvas dimension mismatch at index " + t );
-
-			if ( !Intervals.equalDimensions( ( Dimensions ) tile, ( Dimensions ) interval ) )
-				throw new IllegalArgumentException( "Tile and interval size mismatch at index " + t );
-
-			for ( int d = 0; d < canvas.numDimensions(); d++ )
-			{
-				if ( interval.min( d ) < canvas.min( d ) || interval.max( d ) > canvas.max( d ) )
-					throw new IllegalArgumentException( "Interval at index " + t + " lies outside canvas" );
-			}
-		}
-	}
-
-	private static < R extends IntegerType< R > > void relabel(
-			final RandomAccessibleInterval< R > canvas,
-			final UnionFind uf )
-	{
-		final Set< Integer > roots = new LinkedHashSet<>();
-		final Cursor< R > scan = canvas.cursor();
-		while ( scan.hasNext() )
-		{
-			final int v = scan.next().getInteger();
-			if ( v > 0 )
-				roots.add( uf.find( v ) );
-		}
-
-		final Map< Integer, Integer > rootToCompact = new HashMap<>();
-		int id = 1;
-		for ( final int r : roots )
-			rootToCompact.put( r, id++ );
-
-		final Cursor< R > write = canvas.cursor();
-		while ( write.hasNext() )
-		{
-			final R px = write.next();
-			final int v = px.getInteger();
-			if ( v > 0 )
-				px.setInteger( rootToCompact.get( uf.find( v ) ) );
-		}
-	}
-
-	private static < T extends IntegerType< T > > int maxLabel( final RandomAccessibleInterval< T > tile )
+	private static < T extends IntegerType< T > > int maxLabel(
+			final RandomAccessibleInterval< T > tile )
 	{
 		int max = 0;
 		final Cursor< T > c = tile.cursor();
 		while ( c.hasNext() )
 			max = Math.max( max, c.next().getInteger() );
 		return max;
+	}
+
+	private static < R extends IntegerType< R > > void relabelInPlace(
+			final RandomAccessible< R > canvas,
+			final Interval interval,
+			final UnionFind unionFind )
+	{
+		final IntervalView< R > rai = Views.interval( canvas, interval );
+
+		final Set< Integer > roots = new LinkedHashSet<>();
+		final Cursor< R > scan = rai.cursor();
+		while ( scan.hasNext() )
+		{
+			final int v = scan.next().getInteger();
+			if ( v > 0 )
+				roots.add( unionFind.find( v ) );
+		}
+
+		final Map< Integer, Integer > rootToCompact = new HashMap<>();
+		int id = 1;
+		for ( final int root : roots )
+			rootToCompact.put( root, id++ );
+
+		final Cursor< R > write = rai.cursor();
+		while ( write.hasNext() )
+		{
+			final R px = write.next();
+			final int v = px.getInteger();
+			if ( v > 0 )
+				px.setInteger( rootToCompact.get( unionFind.find( v ) ) );
+		}
+	}
+
+	private static < A extends IntegerType< A >, B extends IntegerType< B > > void copyRelabeled(
+			final RandomAccessible< A > source,
+			final RandomAccessibleInterval< B > target,
+			final UnionFind unionFind )
+	{
+		final Set< Integer > roots = new LinkedHashSet<>();
+		final Cursor< A > scan = Views.interval( source, target ).cursor();
+		while ( scan.hasNext() )
+		{
+			final int v = scan.next().getInteger();
+			if ( v > 0 )
+				roots.add( unionFind.find( v ) );
+		}
+
+		final Map< Integer, Integer > rootToCompact = new HashMap<>();
+		int id = 1;
+		for ( final int root : roots )
+			rootToCompact.put( root, id++ );
+
+		final Cursor< B > dst = target.localizingCursor();
+		final RandomAccess< A > src = source.randomAccess( target );
+		while ( dst.hasNext() )
+		{
+			dst.fwd();
+			src.setPosition( dst );
+
+			final int v = src.get().getInteger();
+			if ( v > 0 )
+				dst.get().setInteger( rootToCompact.get( unionFind.find( v ) ) );
+			else
+				dst.get().setZero();
+		}
 	}
 
 	private static long packPair( int a, int b )
