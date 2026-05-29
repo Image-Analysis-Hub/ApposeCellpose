@@ -11,7 +11,7 @@
 
 	<groupId>net.imglib2</groupId>
 	<artifactId>imglib2-cellpose</artifactId>
-    <version>0.0.2-SNAPSHOT</version>
+	<version>0.0.2-SNAPSHOT</version>
 
 	<name>ImgLib2 Cellpose</name>
 	<description>Running Cellpose 3 and 4 from Java with Appose, using ImgLib2 data structure.</description>
@@ -31,6 +31,19 @@
 
 	<developers>
 		<developer>
+			<id>tinevez</id>
+			<name>Jean-Yves Tinevez</name>
+			<url>https://imagej.net/people/tinevez</url>
+			<roles>
+				<role>lead</role>
+				<role>developer</role>
+				<role>debugger</role>
+				<role>reviewer</role>
+				<role>support</role>
+				<role>maintainer</role>
+			</roles>
+		</developer>
+		<developer>
 			<id>StRigaud</id>
 			<name>Stephane Rigaud</name>
 			<url>https://github.com/StRigaud</url>
@@ -48,48 +61,35 @@
 				<role>maintainer</role>
 			</roles>
 		</developer>
-		<developer>
-			<id>tinevez</id>
-			<name>Jean-Yves Tinevez</name>
-			<url>https://imagej.net/people/tinevez</url>
-			<roles>
-				<role>developer</role>
-				<role>maintainer</role>
-			</roles>
-		</developer>
 	</developers>
-
 	<contributors>
 		<contributor>
-			<name>Someone Who Contributed</name>
-			<url>http://imagej.net/User:TheirWikiUsername</url>
-			<properties>
-				<id>their-id</id>
-			</properties>
+			<name>Curtis Rueden</name>
+			<url>https://imagej.net/people/ctrueden</url>
+			<properties><id>ctrueden</id></properties>
 		</contributor>
 	</contributors>
 
 	<mailingLists>
 		<mailingList>
-			<name>ImageJ Forum</name>
+			<name>Image.sc Forum</name>
 			<archive>https://forum.image.sc/</archive>
 		</mailingList>
 	</mailingLists>
 
 	<scm>
-		<connection>scm:git:git://github.com/imglib/imglib2-cellpose</connection>
-		<developerConnection>
-			scm:git:git@github.com:imglib/imglib2-cellpose</developerConnection>
-		<tag>Cellpose_Appose-0.1.6</tag>
+		<connection>scm:git:https://github.com/imglib/imglib2-cellpose</connection>
+		<developerConnection>scm:git:git@github.com:imglib/imglib2-cellpose</developerConnection>
+		<tag>HEAD</tag>
 		<url>https://github.com/imglib/imglib2-cellpose</url>
 	</scm>
-
 	<issueManagement>
 		<system>GitHub Issues</system>
 		<url>https://github.com/imglib/imglib2-cellpose/issues</url>
 	</issueManagement>
 	<ciManagement>
-		<system>None</system>
+		<system>GitHub Actions</system>
+		<url>https://github.com/imglib/imglib2-cellpose/actions</url>
 	</ciManagement>
 
 	<properties>
@@ -109,7 +109,6 @@
 		<releaseProfiles>sign,deploy-to-scijava</releaseProfiles>
 	</properties>
 
-
 	<dependencies>
 
 		<!-- Appose dependencies -->
@@ -118,14 +117,14 @@
 			<artifactId>appose</artifactId>
 			<version>${appose.version}</version>
 		</dependency>
-		
+
 		<!-- ImgLib2 dependencies -->
 		<dependency>
 			<groupId>net.imglib2</groupId>
 			<artifactId>imglib2-appose</artifactId>
 			<version>${imglib2-appose.version}</version>
 		</dependency>
-		
+
 		<!-- Test dependencies -->
 		<dependency>
 			<groupId>junit</groupId>
@@ -138,8 +137,7 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
-	
-	
+
 	<repositories>
 		<repository>
 			<id>scijava.public</id>
