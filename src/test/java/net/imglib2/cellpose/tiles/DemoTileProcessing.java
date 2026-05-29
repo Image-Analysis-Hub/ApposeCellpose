@@ -37,6 +37,7 @@ import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.type.NativeType;
+import net.imglib2.type.numeric.IntegerType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.util.ImgUtil;
@@ -66,6 +67,7 @@ public class DemoTileProcessing
 			useLUT( merged.getChannelProcessor(), LUT.createLutFromColor( Color.WHITE ) );
 			merged.setC( 2 );
 			useGlasbeyDarkLUT( merged.getChannelProcessor() );
+			merged.setDisplayRange( 0, 500 );
 
 			// Wait for the user to click OK before starting the processing.
 			IJ.showMessage( "Click OK to start Cellpose tile processing demo." );
@@ -137,7 +139,6 @@ public class DemoTileProcessing
 
 								// Cellpose output tile -> output ImagePlus.
 								copyOutput( cellposeOutputData, merged, tileInterval );
-								merged.resetDisplayRange();
 								merged.updateAndDraw();
 							}
 						}
@@ -160,9 +161,10 @@ public class DemoTileProcessing
 
 			// Merge all tiles and display results.
 			merger.finish();
-			final ImagePlus mergedOutput = ImageJFunctions.show( canvas, "Merged Output" );
-			useGlasbeyDarkLUT( mergedOutput.getChannelProcessor() );
-			mergedOutput.resetDisplayRange();
+
+			// Copy final merged labels to the output ImagePlus.
+			copyOutput( canvas, merged, canvas );
+			merged.updateAndDraw();
 		}
 		catch ( final Exception e )
 		{
@@ -184,10 +186,10 @@ public class DemoTileProcessing
 	 *            the tile interval defining the location of the tile in the
 	 *            output ImagePlus
 	 */
-	private static synchronized void copyOutput( final ShmImg< UnsignedShortType > output, final ImagePlus target, final Interval interval )
+	private static synchronized < T extends IntegerType< T > > void copyOutput( final RandomAccessibleInterval< T > output, final ImagePlus target, final Interval interval )
 	{
 		// Basic copy to the output ImagePlus.
-		final Cursor< UnsignedShortType > c = output.localizingCursor();
+		final Cursor< T > c = output.localizingCursor();
 		while ( c.hasNext() )
 		{
 			c.fwd();
@@ -197,7 +199,7 @@ public class DemoTileProcessing
 			final int y = ( int ) ( c.getIntPosition( 1 ) + interval.min( 1 ) );
 			if ( y >= target.getHeight() )
 				continue;
-			final int val = c.get().get();
+			final int val = c.get().getInteger();
 			target.getProcessor().set( x, y, val );
 		}
 	}
