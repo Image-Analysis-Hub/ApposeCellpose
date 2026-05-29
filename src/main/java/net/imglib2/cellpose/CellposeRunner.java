@@ -63,7 +63,7 @@ import net.imglib2.type.numeric.integer.UnsignedByteType;
  * data structure. This class is made to support this approach.
  * 
  */
-class CellposeRunner< T extends RealType< T > & NativeType< T >, R extends IntegerType< R > & NativeType< R > > implements AutoCloseable
+public class CellposeRunner< T extends RealType< T > & NativeType< T >, R extends IntegerType< R > & NativeType< R > > implements AutoCloseable
 {
 
 	private final String envName;
@@ -109,7 +109,7 @@ class CellposeRunner< T extends RealType< T > & NativeType< T >, R extends Integ
 	 *            this placeholder has the right dimensions. Can be
 	 *            <code>null</code> if flows are not computed.
 	 */
-	public CellposeRunner( final CellposeParameters params,
+	CellposeRunner( final CellposeParameters params,
 			final String pythonScriptPath,
 			final String envName,
 			final ApposeTaskListener listener,
