@@ -65,28 +65,32 @@ def run_cellpose_v3(img: np.ndarray, kwargs: dict) -> tuple[np.ndarray, np.ndarr
     """Runs Cellpose v3 on a single image with the given parameters. 
     Refer to Cellpose documentation for kwargs list.    """
 
-    # Manage pretrained model and model type selection based on user inputs
-    # - Prioritize custom model if provided
-    # - Otherwise use model_name with `cyto3` as default
-    custom_model = kwargs.get('custom_model', None)
-    selected_model = kwargs.get('model_name', 'cyto3') if custom_model is None else None
+    model: CellposeModel | None = globals()['model']
+    if model is None:
+        ## Now model should be initialize with cp3_init script but it does not, do initialization here
+		
+        # Manage pretrained model and model type selection based on user inputs
+        # - Prioritize custom model if provided
+        # - Otherwise use model_name with `cyto3` as default
+        custom_model = kwargs.get('custom_model', None)
+        selected_model = kwargs.get('model_name', 'cyto3') if custom_model is None else None
 
-    task.update(
-        current = 2,
-        maximum= 5,
-        message=f"CP3: Deploy model {selected_model if selected_model else custom_model}"
-    )
-    model = models.CellposeModel(
-        model_type=selected_model,
-        pretrained_model=custom_model,
-        gpu=kwargs.get('use_gpu', False),
-        device=kwargs.get('device', None)
-    )
-    task.update(
-        current = 3,
-        maximum= 5,
-        message=f"CP3: Predict labels (device={device})"
-    )
+        task.update(
+       	 current = 2,
+        	maximum= 5,
+        	message=f"CP3: Deploy model {selected_model if selected_model else custom_model}"
+        )
+        model = models.CellposeModel(
+        	model_type=selected_model,
+        	pretrained_model=custom_model,
+        	gpu=kwargs.get('use_gpu', False),
+        	device=kwargs.get('device', None)
+    	)
+        task.update(
+        	current = 3,
+        	maximum= 5,
+        	message=f"CP3: Predict labels (device={device})"
+    	)
 
     # Check if we need to pre-process the dimensions of the image
     channel_axis = kwargs.get('channel_axis', None)

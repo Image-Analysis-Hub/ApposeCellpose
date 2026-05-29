@@ -60,25 +60,27 @@ def filter_channels(selected_channels: list[int | None]) -> list[int]:
 def run_cellpose_v4(img: np.ndarray, kwargs: dict) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Runs Cellpose v4 on a single image with the given parameters. Refer to Cellpose documentation for kwargs list."""
 
-    # Use cpsam pretrained model by default if no custom model is provided
-    custom_model = kwargs.get('custom_model', None)
-    selected_model = "cpsam" if custom_model is None else custom_model
+    model: CellposeModel | None = globals()['model']
+    if model is None:
+        # Use cpsam pretrained model by default if no custom model is provided
+        custom_model = kwargs.get('custom_model', None)
+        selected_model = "cpsam" if custom_model is None else custom_model
 
-    task.update(
-        current = 2,
-        maximum= 5,
-        message=f"CP4: Deploy model {selected_model if selected_model else custom_model}"
-    )
-    model = models.CellposeModel(
-        pretrained_model=selected_model,
-        gpu=kwargs.get('use_gpu', False),
-        device=kwargs.get('device', None)
-    )
-    task.update(
-        current = 3,
-        maximum= 5,
-        message=f"CP4: Predict labels (device={device})"
-    )
+        task.update(
+         current = 2,
+         maximum= 5,
+         message=f"CP4: Deploy model {selected_model if selected_model else custom_model}"
+        )
+        model = models.CellposeModel(
+            pretrained_model=selected_model,
+            gpu=kwargs.get('use_gpu', False),
+            device=kwargs.get('device', None)
+        )
+        task.update(
+          current = 3,
+          maximum= 5,
+          message=f"CP4: Predict labels (device={device})"
+       )
 
     channel_axis = kwargs.get('channel_axis', None)
     z_axis = kwargs.get('z_axis', None)
