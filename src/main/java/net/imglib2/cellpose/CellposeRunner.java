@@ -69,6 +69,8 @@ public class CellposeRunner< T extends RealType< T > & NativeType< T >, R extend
 	private final String envName;
 
 	private final String pythonScriptPath;
+	
+	private final String pythonInitScriptPath;
 
 	private final ApposeTaskListener listener;
 
@@ -77,7 +79,7 @@ public class CellposeRunner< T extends RealType< T > & NativeType< T >, R extend
 	private Service python;
 
 	private String cellposeScript;
-
+	
 
 	/**
 	 * Instantiates a Cellpose runner.
@@ -110,6 +112,7 @@ public class CellposeRunner< T extends RealType< T > & NativeType< T >, R extend
 	 *            <code>null</code> if flows are not computed.
 	 */
 	CellposeRunner( final CellposeParameters params,
+			final String pythonInitScriptPath,
 			final String pythonScriptPath,
 			final String envName,
 			final ApposeTaskListener listener,
@@ -119,6 +122,7 @@ public class CellposeRunner< T extends RealType< T > & NativeType< T >, R extend
 			final ShmImg< UnsignedByteType > outputFlows )
 	{
 		this.pythonScriptPath = pythonScriptPath;
+		this.pythonInitScriptPath = pythonInitScriptPath;
 		this.envName = envName;
 		this.listener = listener;
 		this.inputsParams = params.toApposeMap( input, inputAxisInfo, outputLabels, outputFlows );
@@ -163,8 +167,10 @@ public class CellposeRunner< T extends RealType< T > & NativeType< T >, R extend
 	 *             if there is an error reading the pixi.toml file.
 	 * @throws BuildException
 	 *             if there is an error building the environment.
+	 * @throws TaskException 
+	 * @throws InterruptedException 
 	 */
-	public void init() throws IOException, BuildException
+	public void init() throws IOException, BuildException, InterruptedException, TaskException
 	{
 		// Python env. specifications.
 		final String cellposeEnv = pixiEnv();
@@ -181,7 +187,26 @@ public class CellposeRunner< T extends RealType< T > & NativeType< T >, R extend
 		final String utilsScript = IOUtils.toString( Cellpose.class.getResource( "/cp_utils.py" ), StandardCharsets.UTF_8 );
 		this.python = env.python().init( utilsScript );
 
-		// The script.
+		// The Python initialization task.
+		final String cellposeInitScript =  IOUtils.toString( Cellpose.class.getResource( pythonInitScriptPath ), StandardCharsets.UTF_8 );
+		final Task task = python.task( cellposeInitScript, inputsParams );
+
+		final long start = System.currentTimeMillis();
+		// To catch update message from the python script
+		task.listen( listener.taskListener() );
+		task.start();
+		// Wait for task completion.
+		task.waitFor();
+
+		// Verify that it worked.
+		if ( task.status != TaskStatus.COMPLETE )
+			throw new RuntimeException( "Python script failed with error: " + task.error );
+
+		// Benchmark.
+		final long end = System.currentTimeMillis();
+		listener.message( "Cellpose finished in " + ( end - start ) / 1000. + " s" );
+		
+		// The runner script
 		this.cellposeScript = IOUtils.toString( Cellpose.class.getResource( pythonScriptPath ), StandardCharsets.UTF_8 );
 	}
 

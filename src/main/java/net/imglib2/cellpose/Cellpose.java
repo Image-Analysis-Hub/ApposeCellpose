@@ -89,6 +89,7 @@ public class Cellpose
 			final AxisInfo axisInfo,
 			final R outputType,
 			final CellposeParameters params,
+			final String pythonInitScriptPath,
 			final String pythonScriptPath,
 			final String envName,
 			final ApposeTaskListener listener ) throws BuildException, IOException, InterruptedException, TaskException
@@ -134,6 +135,7 @@ public class Cellpose
 		// Create the runner, configured on the ShmImg.
 		try (final CellposeRunner< T, R > runner = new CellposeRunner<>( 
 				params, 
+				pythonInitScriptPath,
 				pythonScriptPath, 
 				envName, 
 				listener,
@@ -428,7 +430,8 @@ public class Cellpose
 	{
 		final String envName = "cp3-" + getTorchInstallSuffix( params.torchVersion );
 		final String pythonScriptPath = "/cp3.py";
-		return run( img, axisInfo, outputType, params, pythonScriptPath, envName, listener );
+		final String pythonInitScriptPath = "/cp3_init.py";
+		return run( img, axisInfo, outputType, params, pythonInitScriptPath, pythonScriptPath, envName, listener );
 	}
 
 	/**
@@ -498,8 +501,11 @@ public class Cellpose
 	{
 		final String envName = "cp3-" + getTorchInstallSuffix( params.torchVersion );
 		final String pythonScriptPath = "/cp3.py";
+		final String pythonInitScriptPath = "/cp3_init.py";
+		
 		return new CellposeRunner<>(
 				params,
+				pythonInitScriptPath,
 				pythonScriptPath,
 				envName,
 				listener,
@@ -576,8 +582,10 @@ public class Cellpose
 	{
 		final String envName = "cp4-" + getTorchInstallSuffix( params.torchVersion );
 		final String pythonScriptPath = "/cp4.py";
+		final String pythonInitScriptPath = "/cp4_init.py";
 		return new CellposeRunner<>(
 				params,
+				pythonInitScriptPath,
 				pythonScriptPath,
 				envName,
 				listener,
@@ -675,7 +683,9 @@ public class Cellpose
 	{
 		final String envName = "cp4-" + getTorchInstallSuffix( params.torchVersion );
 		final String pythonScriptPath = "/cp4.py";
-		return run( img, axisInfo, outputType, params, pythonScriptPath, envName, listener );
+		final String pythonInitScriptPath = "/cp4_init.py";
+		
+		return run( img, axisInfo, outputType, params, pythonInitScriptPath, pythonScriptPath, envName, listener );
 	}
 
 	/**

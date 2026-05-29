@@ -26,6 +26,7 @@ import net.imglib2.cellpose.AxisInfo;
 import net.imglib2.cellpose.Cellpose;
 import net.imglib2.cellpose.Cellpose3BuiltinModels;
 import net.imglib2.cellpose.Cellpose3Parameters;
+import net.imglib2.cellpose.Cellpose4Parameters;
 import net.imglib2.cellpose.CellposeRunner;
 import net.imglib2.img.Img;
 import net.imglib2.img.display.imagej.ImageJFunctions;
@@ -61,12 +62,15 @@ public class DemoTileProcessing
 			useGlasbeyDarkLUT( merged.getChannelProcessor() );
 
 			// Cellpose config.
-			final Cellpose3Parameters params = Cellpose3Parameters.builder()
+			/**final Cellpose3Parameters params = Cellpose3Parameters.builder()
 					.model( Cellpose3BuiltinModels.NUCLEI )
 					.diameter( 60.0 )
 					.resample( true )
+					.build();*/
+			final Cellpose4Parameters params = Cellpose4Parameters.builder()
+					.resample( true )
 					.build();
-
+			
 			// Tiles.
 			final int[] blockSize = new int[] { 512, 512 };
 			final FinalDimensions blockDims = new FinalDimensions( blockSize );
@@ -81,9 +85,9 @@ public class DemoTileProcessing
 					final ShmImg< T > cellposeInputData = Cellpose.createInputShmImg( blockDims, img.getType() );
 					final ShmImg< UnsignedShortType > cellposeOutputData = Cellpose.createOutputLabelsShmImg( blockDims, axisInfo, new UnsignedShortType() );
 					// The runner.
-					final CellposeRunner< T, UnsignedShortType > runner = Cellpose.cellpose3Runner(
+					final CellposeRunner< T, UnsignedShortType > runner = Cellpose.cellpose4Runner(
 							params,
-							ApposeTaskListener.VOID,
+							ApposeTaskListener.STD,
 							cellposeInputData,
 							axisInfo,
 							cellposeOutputData,
