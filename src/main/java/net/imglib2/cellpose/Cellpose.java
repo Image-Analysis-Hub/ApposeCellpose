@@ -431,6 +431,63 @@ public class Cellpose
 		return run( img, axisInfo, outputType, params, pythonScriptPath, envName, listener );
 	}
 
+	/**
+	 * Creates a CellposeRunner configured to run Cellpose 3 with the given
+	 * parameters, and read and write intput and output in the specified
+	 * ShmImgs.
+	 * <p>
+	 * The runner is useful if you want to run Cellpose multiple times on
+	 * different images, but with the same parameters, as it allows to reuse the
+	 * same Python environment and the same shared memory placeholders for input
+	 * and output, which can save time. In this case, you can create the runner
+	 * once with this method, and then call the {@link CellposeRunner#run()}
+	 * method multiple times, after writing new input data in the input ShmImg
+	 * and reading the output data from the output ShmImgs.
+	 * 
+	 * @param <T>
+	 *            the pixel type of the input image.
+	 * @param <R>
+	 *            the pixel type of the output label image. It can be either
+	 *            UnsignedShortType or UnsignedIntType (if the number of labels
+	 *            in one image is larger than 65k).
+	 * @param params
+	 *            the parameters to run Cellpose with.
+	 * @param listener
+	 *            the listener to receive progress updates and messages during
+	 *            the execution of the Cellpose task.
+	 * @param input
+	 *            the shared memory image to use as input for the
+	 *            CellposeRunner. Consumers will want to write the input image
+	 *            data into this ShmImg before calling the runner's run()
+	 *            method.
+	 * @param inputAxisInfo
+	 *            the AxisInfo of the input image.
+	 * @param outputLabels
+	 *            the shared memory image to use as output for the labels of the
+	 *            CellposeRunner. Consumers will want to read the output label
+	 *            image data from this ShmImg after calling the runner's run()
+	 *            method.
+	 * @param outputLabels
+	 *            the shared memory image to use as output for the flows of the
+	 *            CellposeRunner. Consumers will want to read the output flows
+	 *            image data from this ShmImg after calling the runner's run()
+	 *            method.
+	 * @param outputFlows
+	 *            the shared memory image to use as output for the flows of the
+	 *            CellposeRunner. Consumers will want to read the output flows
+	 *            image data from this ShmImg after calling the runner's run()
+	 *            method. It can be <code>null</code> if flows are not computed.
+	 * @return a CellposeRunner configured to run Cellpose 3.
+	 * @throws BuildException
+	 *             if installing and building the Python environment fails.
+	 * @throws IOException
+	 *             if reading the Python scripts or environment specifications
+	 *             fails.
+	 * @throws InterruptedException
+	 *             if the Python process is interrupted while running.
+	 * @throws TaskException
+	 *             if executing the Python script fails.
+	 */
 	public static < T extends RealType< T > & NativeType< T >, R extends IntegerType< R > & NativeType< R > > CellposeRunner< T, R > cellpose3Runner(
 			final Cellpose3Parameters params,
 			final ApposeTaskListener listener,
