@@ -76,9 +76,9 @@ public class LabelTileMerger
 
 			final RandomAccessibleInterval< T > tileInWorld = translateToInterval( tile, interval );
 
-			final Map< Integer, Integer > cntOld = new HashMap<>();
-			final Map< Integer, Integer > cntNew = new HashMap<>();
-			final Map< Long, Integer > cntCo = new HashMap<>();
+			final Map< Integer, Integer > oldLabelCounts = new HashMap<>();
+			final Map< Integer, Integer > newLabelCounts = new HashMap<>();
+			final Map< Long, Integer > overlapCounts = new HashMap<>();
 
 			final Cursor< T > tileCursor = tileInWorld.localizingCursor();
 
@@ -97,9 +97,9 @@ public class LabelTileMerger
 
 				if ( canvasVal > 0 )
 				{
-					cntOld.merge( canvasVal, 1, Integer::sum );
-					cntNew.merge( globalNew, 1, Integer::sum );
-					cntCo.merge( packPair( canvasVal, globalNew ), 1, Integer::sum );
+					oldLabelCounts.merge( canvasVal, 1, Integer::sum );
+					newLabelCounts.merge( globalNew, 1, Integer::sum );
+					overlapCounts.merge( packPair( canvasVal, globalNew ), 1, Integer::sum );
 				}
 				else
 				{
@@ -107,12 +107,12 @@ public class LabelTileMerger
 				}
 			}
 
-			for ( final Map.Entry< Long, Integer > e : cntCo.entrySet() )
+			for ( final Map.Entry< Long, Integer > e : overlapCounts.entrySet() )
 			{
 				final int oldLbl = unpackHigh( e.getKey() );
 				final int newLbl = unpackLow( e.getKey() );
 				final int intersection = e.getValue();
-				final int union = cntOld.get( oldLbl ) + cntNew.get( newLbl ) - intersection;
+				final int union = oldLabelCounts.get( oldLbl ) + newLabelCounts.get( newLbl ) - intersection;
 
 				if ( union > 0 && ( double ) intersection / union >= iouThresh )
 					uf.union( oldLbl, newLbl );
