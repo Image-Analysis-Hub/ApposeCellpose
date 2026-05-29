@@ -46,6 +46,7 @@ import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.IntegerType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
+import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.util.ImgUtil;
 import net.imglib2.util.Util;
 import net.imglib2.view.IntervalView;
@@ -341,6 +342,46 @@ public class Cellpose
 
 	/**
 	 * Run Cellpose 3 with the given parameters on the given image, and return
+	 * the resulting label image, and optionally the flows. This method uses
+	 * UnsignedShortType for the output labels, which is suitable for images
+	 * with up to 65k labels. If you expect more than 65k labels in one image,
+	 * please use the other cellpose3 method where you can specify the output
+	 * label type (UnsignedIntType).
+	 * 
+	 * @param <T>
+	 *            the pixel type of the input image.
+	 * @param img
+	 *            the input image. X and Y must be the first dimensions.
+	 * @param axisInfo
+	 *            the AxisInfo of the input image.
+	 * @param params
+	 *            the parameters to run Cellpose with.
+	 * @param listener
+	 *            the listener to receive progress updates and messages during
+	 *            the execution of the Cellpose task.
+	 * @return a {@link CellposeOutput} object containing the label image, and
+	 *         optionally the flows image.
+	 * @throws BuildException
+	 *             if installing and building the Python environment fails.
+	 * @throws IOException
+	 *             if reading the Python scripts or environment specifications
+	 *             fails.
+	 * @throws InterruptedException
+	 *             if the Python process is interrupted while running.
+	 * @throws TaskException
+	 *             if executing the Python script fails.
+	 */
+	public static < T extends RealType< T > & NativeType< T > > CellposeOutput< UnsignedShortType > cellpose3(
+			final RandomAccessibleInterval< T > img,
+			final AxisInfo axisInfo,
+			final Cellpose3Parameters params,
+			final ApposeTaskListener listener ) throws BuildException, IOException, InterruptedException, TaskException
+	{
+		return cellpose3( img, axisInfo, new UnsignedShortType(), params, listener );
+	}
+
+	/**
+	 * Run Cellpose 3 with the given parameters on the given image, and return
 	 * the resulting label image, and optionally the flows.
 	 * 
 	 * @param <T>
@@ -409,6 +450,46 @@ public class Cellpose
 				inputAxisInfo,
 				outputLabels,
 				outputFlows );
+	}
+
+	/**
+	 * Run Cellpose-SAM with the given parameters on the given image, and return
+	 * the resulting label image, and optionally the flows. This method uses
+	 * UnsignedShortType for the output labels, which is suitable for images
+	 * with up to 65k labels. If you expect more than 65k labels in one image,
+	 * please use the other cellpose4 method where you can specify the output
+	 * label type (UnsignedIntType).
+	 * 
+	 * @param <T>
+	 *            the pixel type of the input image.
+	 * @param img
+	 *            the input image. X and Y must be the first dimensions.
+	 * @param axisInfo
+	 *            the AxisInfo of the input image.
+	 * @param params
+	 *            the parameters to run Cellpose with.
+	 * @param listener
+	 *            the listener to receive progress updates and messages during
+	 *            the execution of the Cellpose task.
+	 * @return a {@link CellposeOutput} object containing the label image, and
+	 *         optionally the flows image.
+	 * @throws BuildException
+	 *             if installing and building the Python environment fails.
+	 * @throws IOException
+	 *             if reading the Python scripts or environment specifications
+	 *             fails.
+	 * @throws InterruptedException
+	 *             if the Python process is interrupted while running.
+	 * @throws TaskException
+	 *             if executing the Python script fails.
+	 */
+	public static < T extends RealType< T > & NativeType< T > > CellposeOutput< UnsignedShortType > cellpose4(
+			final RandomAccessibleInterval< T > img,
+			final AxisInfo axisInfo,
+			final Cellpose4Parameters params,
+			final ApposeTaskListener listener ) throws BuildException, IOException, InterruptedException, TaskException
+	{
+		return cellpose4( img, axisInfo, new UnsignedShortType(), params, listener );
 	}
 
 	/**
