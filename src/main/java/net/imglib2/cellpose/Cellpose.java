@@ -133,11 +133,11 @@ public class Cellpose
 		}
 
 		// Create the runner, configured on the ShmImg.
-		try (final CellposeRunner< T, R > runner = new CellposeRunner<>( 
-				params, 
+		try (final CellposeRunner< T, R > runner = new CellposeRunner<>(
+				params,
 				pythonInitScriptPath,
-				pythonScriptPath, 
-				envName, 
+				pythonScriptPath,
+				envName,
 				listener,
 				inputShm,
 				inputAxisInfo,
@@ -207,6 +207,12 @@ public class Cellpose
 					if ( params.computeFlows )
 						ImgUtil.copy( outputFlowsShm, outputFlowsTp );
 				}
+
+				// Close placeholder ShmImgs.
+				inputShm.close();
+				outputLabelsShm.close();
+				if ( params.computeFlows )
+					outputFlowsShm.close();
 
 				// Return all time-points.
 				@SuppressWarnings( { "rawtypes", "unchecked" } )
