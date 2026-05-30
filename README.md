@@ -2,6 +2,8 @@
 
 # ImgLib2 Cellpose
 
+<img src="https://camo.githubusercontent.com/eded2b19d541a149b71e23cd40fa4ce2dfd6158146b04687361704a48e084e26/687474703a2f2f7777772e63656c6c706f73652e6f72672f7374617469632f696d616765732f6c6f676f2e706e673f7261773d54727565" width="128" alt="cellpose-logo"> ➡ <img src="https://github.com/imglib/imglib2/blob/master/doc/imglib2-logo-icon.png?raw=true" width="128" alt="imglib2-logo">
+
 Running Cellpose 3 and 4 from Java with [Appose](https://apposed.org/), using [ImgLib2](https://imglib2.net/imglib2/) data structure.
 
 This small library is meant as a go to for Java developers who want to use Cellpose in their projects, without having to worry about the details of how to call Python from Java.
@@ -253,3 +255,5 @@ The file [DemoTileProcessing.java](https://github.com/imglib/imglib2-cellpose/bl
 Four runners are created, each on a separate thread, and process each a subset of the tiles that cover
 the input image. The results are then stitched together to produce the final segmentation of the whole image.
 
+See the results here on a 2560x2160 image from the IDR:
+https://bsky.app/profile/jytinevez.bsky.social/post/3mmz45rwxns2l 
