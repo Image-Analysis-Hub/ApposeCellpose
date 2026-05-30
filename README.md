@@ -17,7 +17,7 @@ The environments are managed by [pixi](https://pixi.prefix.dev/latest/), and App
 
 The next time you use library, the environment will be directly activated and calls will be much faster. So don't panick if not much happens for a while the first time.  
 
-Once installed, the environment will look like this (on Mac, with no NVIDIA GPT):
+Once installed, the environment will look like this (on Mac, with no NVIDIA GPU):
 
 ```zsh
 # ~/.local/share/appose/cellpose-appose 
@@ -65,13 +65,14 @@ RandomAccessibleInterval< UnsignedByteType > flows = output.flows;
     <img src="docs/DemoOutput.png" alt="Labels output" width="25%" />
     <img src="docs/DemoOuputFlows.png" alt="Flows output" width="25%" />
 </p>
+(See [basic usage example code](https://github.com/imglib/imglib2-cellpose/blob/main/src/test/java/net/imglib2/cellpose/BasicUsage.java#L56).)
 
 The `Cellpose` gateway class also has a `cellpose4` method, with similar parameters, to run Cellpose 4.
 
-These methods can process any kind of 5D input, from a 'XYCZT' combination of axes. You need to specify what axis is what with the `AxisInfo` record. It has constant for common siutations, that assume the axes order is 'XYCZT'.
+These methods can process any kind of 5D input, from a 'XYCZT' combination of axes. You need to specify what axis is what with the `AxisInfo` record. It has static constant fields for common siutations, that assume the axes order is 'XYCZT'.
 
 > [!WARNING]  
-> You can input with axes in any order, but the **X and Y axes must be the first two and must be present**. If not an exception will be thrown.
+> You can use an input with axes in any order, but the **X and Y axes must be the first two and must be present**. If not an exception will be thrown.
 
 When processing 'XYZT' or 'XYCZT' inputs (5D images), the gateway processes each time-point one after another, because the Python Cellpose does not support 5D inputs. All other cases are batched in one Cellpose call.
 
@@ -94,6 +95,7 @@ CellposeOutput< UnsignedIntType > output = Cellpose.cellpose3(
     listener );
 ```
 
+(See [output type example code](https://github.com/imglib/imglib2-cellpose/blob/main/src/test/java/net/imglib2/cellpose/BasicUsage.java#L29).)
 
 ## Speciyfing parameters
 
@@ -183,5 +185,70 @@ We are still discussiing whether this is a [bug](https://github.com/apposed/appo
 
 ## Cellpose runner and advanced usage
 
+The `CellposeRunner` class allows for batch processing efficiently.
 
+Running `Cellpose.cellpose3()` involves initializing a pixi environment, creating a Python service, then launching a Python task that loads a Cellpose model, and evaluate it on the input image. 
+This is not optimal if you want to process many images, as the initialization and loading phases are long and are repeated for each image.
+The `CellposeRunner` class allows you to initialize the environment and load the model once, and then run Cellpose on as many images as you want.
+
+An outline of the usage is the following:
+
+```java
+try ( 
+    // The tmp data location to pass input to Cellpose.
+    ShmImg< UnsignedByteType > tmpInput = Cellpose.createInputShmImg( ... );
+    // The tmp data location to receive the Cellpose labels output.
+    ShmImg< UnsignedShortType > tmpLabels  = Cellpose.createOutputLabelsShmImg( ... );
+    // The tmp data location to receive the Cellpose flows output.
+    ShmImg< UnsignedByteType > tmpFlows = Cellpose.createOutputFlowsShmImg( ... );
+    // The Cellpose runner, initialized with the tmp data locations.
+    // If you pass it a Cellpose 3 parameter object, it will be a
+    // runner configured to run Cellpose 3.
+    CellposeRunner< UnsignedByteType, UnsignedShortType > runner = Cellpose.cellposeRunner(
+            params,
+            ApposeTaskListener.VOID,
+            tmpInput,
+            axes,
+            tmpLabels,
+            tmpFlows ) )            
+{
+    runner.init();
+    for ( int i = 0; i < nImages; i++ )
+	{
+        RandomAccessibleInterval< UnsignedByteType > input = ...
+        // Copy input to shared data location.
+        ImgUtil.copy( input, tmpInput );
+        // Run Cellpose. The results will be written in the tmpLabels
+        // and tmpFlows images.
+        startTime = System.currentTimeMillis();
+        runner.run();
+        // The output of Cellpose is now in tmpLabels and tmpFlows, you can copy it to your final destination.
+    }
+}
+// Outside of the try-with-resources block, the runner and the tmp shared memory images are
+// closed and cleaned up.
+```
+
+Here is an example of the timing on my Macbook Pro M1, processing 10 512x512 8-bit images:
+```
+Runner and placeholders creation time: 0.34 seconds
+Runner initialization time: 2.54 seconds
+
+Processing image 1/10
+Input copy time: 0.03 seconds
+Cellpose run time: 0.37 seconds
+Output copy to a new image time: 0.02 seconds
+
+Processing image 2/10
+Input copy time: 0.02 seconds
+Cellpose run time: 0.13 seconds
+Output copy to a new image time: 0.00 seconds
+...
+```
+
+## Example parallel processing and tile processing
+
+The file [DemoTileProcessing.java](https://github.com/imglib/imglib2-cellpose/blob/main/src/test/java/net/imglib2/cellpose/tiles/DemoTileProcessing.java) contains a demo on processing a (theoretically) large image by tiles, and processing the tiles in parallel with a pool of `CellposeRunner`. 
+Four runners are created, each on a separate thread, and process each a subset of the tiles that cover
+the input image. The results are then stitched together to produce the final segmentation of the whole image.
 

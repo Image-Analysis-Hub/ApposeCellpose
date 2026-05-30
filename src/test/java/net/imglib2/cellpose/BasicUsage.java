@@ -1,6 +1,8 @@
 package net.imglib2.cellpose;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apposed.appose.BuildException;
 import org.apposed.appose.TaskException;
@@ -9,13 +11,16 @@ import ij.IJ;
 import ij.ImageJ;
 import ij.ImagePlus;
 import net.imglib2.RandomAccessibleInterval;
+import net.imglib2.appose.ShmImg;
 import net.imglib2.img.Img;
+import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.type.numeric.integer.UnsignedIntType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
+import net.imglib2.util.ImgUtil;
 
 public class BasicUsage
 {
@@ -24,6 +29,7 @@ public class BasicUsage
 	{
 		basicUsage( args );
 //		outputType( args );
+//		cellposeRunner( args );
 	}
 
 	public static < T extends RealType< T > & NativeType< T > > void outputType( final String[] args ) throws BuildException, IOException, InterruptedException, TaskException
@@ -84,4 +90,98 @@ public class BasicUsage
 		ImageJFunctions.show( labels ).setTitle( "Cellpose output" );
 		ImageJFunctions.show( flows ).setTitle( "Cellpose flows" );
 	}
+
+	public static void cellposeRunner( final String[] args ) throws BuildException, IOException, InterruptedException, TaskException
+	{
+		// Create fake images. Replace by your own images here.
+		// The constraint is that the images need to have the same dimensions
+		// and axes.
+		final int nImages = 10;
+		final int width = 512;
+		final int height = width;
+		final AxisInfo axes = AxisInfo.XY;
+
+		final List< RandomAccessibleInterval< UnsignedShortType > > outputImages = new ArrayList<>( nImages );
+		final List< RandomAccessibleInterval< UnsignedByteType > > inputImages = new ArrayList<>( nImages );
+		for ( int i = 0; i < nImages; i++ )
+		{
+			final RandomAccessibleInterval< UnsignedByteType > img = ArrayImgs.unsignedBytes( width, height );
+			inputImages.add( img );
+		}
+
+		// Specify the parameters for Cellpose 3. Adjust to your needs.
+		final Cellpose3Parameters params = Cellpose3Parameters.builder()
+				.model( Cellpose3BuiltinModels.CYTO2 )
+				.channels( 1, 0 )
+				.computeFlows( true )
+				.build();
+
+		// Time everything.
+		long startTime = System.currentTimeMillis();
+
+		// Now we create the Cellpose runner and the shared tmp images in a
+		// try-with-resources block. This way we are sure that the shared tmp
+		// images are and the Cellpose runner are properly closed and cleaned up
+		// after use.
+		try (
+				// The tmp data location to pass input to Cellpose.
+				final ShmImg< UnsignedByteType > tmpInput = Cellpose.createInputShmImg( inputImages.get( 0 ) );
+				// The tmp data location to receive the Cellpose labels output.
+				final ShmImg< UnsignedShortType > tmpLabels = Cellpose.createOutputLabelsShmImg( tmpInput, axes, new UnsignedShortType() );
+				// The tmp data location to receive the Cellpose flows output.
+				final ShmImg< UnsignedByteType > tmpFlows = Cellpose.createOutputFlowsShmImg( tmpInput, axes );
+				// The Cellpose runner, initialized with the tmp data locations.
+				// Because we passed a Cellpose 3 parameter object, it will be a
+				// runner configured to run Cellpose 3.
+				final CellposeRunner< UnsignedByteType, UnsignedShortType > runner = Cellpose.cellposeRunner(
+						params,
+						ApposeTaskListener.VOID,
+						tmpInput,
+						axes,
+						tmpLabels,
+						tmpFlows ))
+		{
+			System.out.println( String.format( "Runner and placeholders creation time: %.2f seconds", ( System.currentTimeMillis() - startTime ) / 1000. ) );
+
+			// Initialize the runner. This will deploy the Python environment
+			// and script if not already done, and prepare everything for
+			// running Cellpose.
+			startTime = System.currentTimeMillis();
+			runner.init();
+			System.out.println( String.format( "Runner initialization time: %.2f seconds", ( System.currentTimeMillis() - startTime ) / 1000. ) );
+
+			// Run Cellpose on each image.
+			for ( int i = 0; i < nImages; i++ )
+			{
+				System.out.println( String.format( "\nProcessing image %d/%d", i + 1, nImages ) );
+				final RandomAccessibleInterval< UnsignedByteType > input = inputImages.get( i );
+
+				// Copy the input image to the tmp location.
+				startTime = System.currentTimeMillis();
+				ImgUtil.copy( input, tmpInput );
+				System.out.println( String.format( "Input copy time: %.2f seconds", ( System.currentTimeMillis() - startTime ) / 1000. ) );
+
+				// Run Cellpose. The results will be written in the tmpLabels
+				// and tmpFlows images.
+				startTime = System.currentTimeMillis();
+				runner.run();
+				System.out.println( String.format( "Cellpose run time: %.2f seconds", ( System.currentTimeMillis() - startTime ) / 1000. ) );
+
+				// Copy the output to a new image.
+				startTime = System.currentTimeMillis();
+				final RandomAccessibleInterval< UnsignedShortType > outputLabels = ArrayImgs.unsignedShorts( input.dimensionsAsLongArray() );
+				ImgUtil.copy( tmpLabels, outputLabels );
+				System.out.println( String.format( "Output copy to a new image time: %.2f seconds", ( System.currentTimeMillis() - startTime ) / 1000. ) );
+				outputImages.add( outputLabels );
+			}
+
+			startTime = System.currentTimeMillis();
+		}
+		System.out.println( String.format( "Closing shared resources time: %.2f seconds", ( System.currentTimeMillis() - startTime ) / 1000. ) );
+
+		// At this point the runner and the tmp shared memory images are
+		// closed and cleaned up, and you can safely exit or do other things
+		// with the output images.
+	}
+
 }
