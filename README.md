@@ -60,11 +60,11 @@ CellposeOutput< UnsignedShortType > output = Cellpose.cellpose3( input, inputAxe
 RandomAccessibleInterval< UnsignedShortType > labels = output.labels;
 RandomAccessibleInterval< UnsignedByteType > flows = output.flows;
 ```
-<p float="left">
-    <img src="docs/DemoInput.png" alt="Input" style="zoom:25%;" />
-    <img src="docs/DemoOutput.png" alt="Labels output" style="zoom:25%;" />
-    <img src="docs/DemoOuputFlows.png" alt="Flows output" style="zoom:25%;" />
 <p>
+    <img src="docs/DemoInput.png" alt="Input" width="25%" />
+    <img src="docs/DemoOutput.png" alt="Labels output" width="25%" />
+    <img src="docs/DemoOuputFlows.png" alt="Flows output" width="25%" />
+</p>
 
 The `Cellpose` gateway class also has a `cellpose4` method, with similar parameters, to run Cellpose 4.
 
