@@ -33,12 +33,14 @@
 package net.imglib2.cellpose;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeTrue;
 
 import java.io.IOException;
 import java.util.function.BiFunction;
 
 import org.apposed.appose.BuildException;
 import org.apposed.appose.TaskException;
+import org.junit.Test;
 
 import net.imglib2.Dimensions;
 import net.imglib2.FinalInterval;
@@ -58,9 +60,10 @@ import net.imglib2.view.Views;
 public class CellposeDimensionalitiesTest
 {
 
-	// @Test
+	@Test
 	public void testCellpose3_XY()
 	{
+		skipIfTestThresholdLessThan( 6 );
 		final Cellpose3Parameters params = Cellpose3Parameters.builder()
 				.model( Cellpose3BuiltinModels.CYTO2 )
 				.channels( 1, 0 )
@@ -69,9 +72,10 @@ public class CellposeDimensionalitiesTest
 		test( cellpose3Runner( params ), CellposeTestDims.XY );
 	}
 
-	// @Test
+	@Test
 	public void testCellpose3_XYC()
 	{
+		skipIfTestThresholdLessThan( 5 );
 		final Cellpose3Parameters params = Cellpose3Parameters.builder()
 				.model( Cellpose3BuiltinModels.CYTO2 )
 				.computeFlows( true )
@@ -80,9 +84,10 @@ public class CellposeDimensionalitiesTest
 		test( cellpose3Runner( params ), CellposeTestDims.XYC );
 	}
 
-	// @Test
+	@Test
 	public void testCellpose3_XYT()
 	{
+		skipIfTestThresholdLessThan( 6 );
 		final Cellpose3Parameters params = Cellpose3Parameters.builder()
 				.model( Cellpose3BuiltinModels.CYTO2 )
 				.computeFlows( true )
@@ -91,9 +96,10 @@ public class CellposeDimensionalitiesTest
 		test( cellpose3Runner( params ), CellposeTestDims.XYT );
 	}
 
-	// @Test
+	@Test
 	public void testCellpose3_XYCT()
 	{
+		skipIfTestThresholdLessThan( 5 );
 		final Cellpose3Parameters params = Cellpose3Parameters.builder()
 				.model( Cellpose3BuiltinModels.CYTO2 )
 				.computeFlows( true )
@@ -102,9 +108,10 @@ public class CellposeDimensionalitiesTest
 		test( cellpose3Runner( params ), CellposeTestDims.XYCT );
 	}
 
-	// @Test
+	@Test
 	public void testCellpose3_XYZ()
 	{
+		skipIfTestThresholdLessThan( 7 );
 		final Cellpose3Parameters params = Cellpose3Parameters.builder()
 				.model( Cellpose3BuiltinModels.CYTO2 )
 				.computeFlows( true )
@@ -114,9 +121,10 @@ public class CellposeDimensionalitiesTest
 		test( cellpose3Runner( params ), CellposeTestDims.XYZ );
 	}
 
-	// @Test
+	@Test
 	public void testCellpose3_XYZT()
 	{
+		skipIfTestThresholdLessThan( 12 );
 		final Cellpose3Parameters params = Cellpose3Parameters.builder()
 				.model( Cellpose3BuiltinModels.CYTO2 )
 				.computeFlows( true )
@@ -126,8 +134,10 @@ public class CellposeDimensionalitiesTest
 		test( cellpose3Runner( params ), CellposeTestDims.XYZT );
 	}
 
+	@Test //?
 	public void testCellpose3_XYCZ()
 	{
+		skipIfTestThresholdLessThan( 7 );
 		final Cellpose3Parameters params = Cellpose3Parameters.builder()
 				.model( Cellpose3BuiltinModels.CYTO2 )
 				.computeFlows( true )
@@ -137,8 +147,10 @@ public class CellposeDimensionalitiesTest
 		test( cellpose3Runner( params ), CellposeTestDims.XYCZ );
 	}
 
+	@Test //?
 	public void testCellpose3_XYCZT()
 	{
+		skipIfTestThresholdLessThan( 29 );
 		final Cellpose3Parameters params = Cellpose3Parameters.builder()
 				.model( Cellpose3BuiltinModels.CYTO2 )
 				.computeFlows( true )
@@ -148,9 +160,10 @@ public class CellposeDimensionalitiesTest
 		test( cellpose3Runner( params ), CellposeTestDims.XYCZT );
 	}
 
-	// @Test
-	public void testCellpose3_XYZ_NoStich()
+	@Test
+	public void testCellpose3_XYZ_NoStitch()
 	{
+		skipIfTestThresholdLessThan( 6 );
 		final Cellpose3Parameters params = Cellpose3Parameters.builder()
 				.model( Cellpose3BuiltinModels.CYTO2 )
 				.computeFlows( true )
@@ -160,9 +173,10 @@ public class CellposeDimensionalitiesTest
 		test( cellpose3Runner( params ), CellposeTestDims.XYZ );
 	}
 
-	// @Test
-	public void testCellpose3_XYZT_NoStich()
+	@Test
+	public void testCellpose3_XYZT_NoStitch()
 	{
+		skipIfTestThresholdLessThan( 13 );
 		final Cellpose3Parameters params = Cellpose3Parameters.builder()
 				.model( Cellpose3BuiltinModels.CYTO2 )
 				.computeFlows( true )
@@ -172,9 +186,10 @@ public class CellposeDimensionalitiesTest
 		test( cellpose3Runner( params ), CellposeTestDims.XYZT );
 	}
 
-	// @Test
-	public void testCellpose3_XYZT_NoStich_Mode3D()
+	@Test
+	public void testCellpose3_XYZT_NoStitch_Mode3D()
 	{
+		skipIfTestThresholdLessThan( 31 );
 		final Cellpose3Parameters params = Cellpose3Parameters.builder()
 				.model( Cellpose3BuiltinModels.CYTO2 )
 				.computeFlows( true )
@@ -185,9 +200,10 @@ public class CellposeDimensionalitiesTest
 		test( cellpose3Runner( params ), CellposeTestDims.XYZT );
 	}
 
-	// @Test
-	public void testCellpose3_XYCZ_NoStich()
+	@Test
+	public void testCellpose3_XYCZ_NoStitch()
 	{
+		skipIfTestThresholdLessThan( 6 );
 		final Cellpose3Parameters params = Cellpose3Parameters.builder()
 				.model( Cellpose3BuiltinModels.CYTO2 )
 				.computeFlows( true )
@@ -197,9 +213,10 @@ public class CellposeDimensionalitiesTest
 		test( cellpose3Runner( params ), CellposeTestDims.XYCZ );
 	}
 
-	// @Test
-	public void testCellpose3_XYCZT_NoStich()
+	@Test
+	public void testCellpose3_XYCZT_NoStitch()
 	{
+		skipIfTestThresholdLessThan( 15 );
 		final Cellpose3Parameters params = Cellpose3Parameters.builder()
 				.model( Cellpose3BuiltinModels.CYTO2 )
 				.computeFlows( true )
@@ -209,45 +226,50 @@ public class CellposeDimensionalitiesTest
 		test( cellpose3Runner( params ), CellposeTestDims.XYCZT );
 	}
 
-	// @Test
+	@Test
 	public void testCellpose4_XY()
 	{
+		skipIfTestThresholdLessThan( 53 );
 		final Cellpose4Parameters params = Cellpose4Parameters.builder()
 				.computeFlows( true )
 				.build();
 		test( cellpose4Runner( params ), CellposeTestDims.XY );
 	}
 
-	// @Test
+	@Test
 	public void testCellpose4_XYC()
 	{
+		skipIfTestThresholdLessThan( 53 );
 		final Cellpose4Parameters params = Cellpose4Parameters.builder()
 				.computeFlows( true )
 				.build();
 		test( cellpose4Runner( params ), CellposeTestDims.XYC );
 	}
 
-	// @Test
+	@Test
 	public void testCellpose4_XYT()
 	{
+		skipIfTestThresholdLessThan( 140 );
 		final Cellpose4Parameters params = Cellpose4Parameters.builder()
 				.computeFlows( true )
 				.build();
 		test( cellpose4Runner( params ), CellposeTestDims.XYT );
 	}
 
-	// @Test
+	@Test
 	public void testCellpose4_XYCT()
 	{
+		skipIfTestThresholdLessThan( 140 );
 		final Cellpose4Parameters params = Cellpose4Parameters.builder()
 				.computeFlows( true )
 				.build();
 		test( cellpose4Runner( params ), CellposeTestDims.XYCT );
 	}
 
-	// @Test
+	@Test
 	public void testCellpose4_XYZ()
 	{
+		skipIfTestThresholdLessThan( 439 );
 		final Cellpose4Parameters params = Cellpose4Parameters.builder()
 				.stitchThreshold( 0.4 )
 				.computeFlows( true )
@@ -255,9 +277,10 @@ public class CellposeDimensionalitiesTest
 		test( cellpose4Runner( params ), CellposeTestDims.XYZ );
 	}
 
-	// @Test // 30s
+	@Test
 	public void testCellpose4_XYZT()
 	{
+		skipIfTestThresholdLessThan( 2178 );
 		final Cellpose4Parameters params = Cellpose4Parameters.builder()
 				.stitchThreshold( 0.4 )
 				.computeFlows( true )
@@ -265,9 +288,10 @@ public class CellposeDimensionalitiesTest
 		test( cellpose4Runner( params ), CellposeTestDims.XYZT );
 	}
 
-	// @Test
+	@Test
 	public void testCellpose4_XYCZ()
 	{
+		skipIfTestThresholdLessThan( 454 );
 		final Cellpose4Parameters params = Cellpose4Parameters.builder()
 				.stitchThreshold( 0.4 )
 				.computeFlows( true )
@@ -275,9 +299,10 @@ public class CellposeDimensionalitiesTest
 		test( cellpose4Runner( params ), CellposeTestDims.XYCZ );
 	}
 
-	// @Test // 30s
+	@Test
 	public void testCellpose4_XYCZT()
 	{
+		skipIfTestThresholdLessThan( 2164 );
 		final Cellpose4Parameters params = Cellpose4Parameters.builder()
 				.stitchThreshold( 0.4 )
 				.computeFlows( true )
@@ -285,9 +310,10 @@ public class CellposeDimensionalitiesTest
 		test( cellpose4Runner( params ), CellposeTestDims.XYCZT );
 	}
 
-	// @Test
-	public void testCellpose4_XYZ_NoStich()
+	@Test
+	public void testCellpose4_XYZ_NoStitch()
 	{
+		skipIfTestThresholdLessThan( 448 );
 		final Cellpose4Parameters params = Cellpose4Parameters.builder()
 				.stitchThreshold( 0. )
 				.computeFlows( true )
@@ -295,9 +321,10 @@ public class CellposeDimensionalitiesTest
 		test( cellpose4Runner( params ), CellposeTestDims.XYZ );
 	}
 
-//	// @Test // So slow!! 450s!
-	public void testCellpose4_XYZT_NoStich_Mode3D()
+	@Test
+	public void testCellpose4_XYZT_NoStitch_Mode3D()
 	{
+		skipIfTestThresholdLessThan( 44942 );
 		final Cellpose4Parameters params = Cellpose4Parameters.builder()
 				.stitchThreshold( 0. )
 				.do3D( true )
@@ -306,9 +333,10 @@ public class CellposeDimensionalitiesTest
 		test( cellpose4Runner( params ), CellposeTestDims.XYZT );
 	}
 
-	// @Test // 30s
-	public void testCellpose4_XYZT_NoStich()
+	@Test
+	public void testCellpose4_XYZT_NoStitch()
 	{
+		skipIfTestThresholdLessThan( 2179 );
 		final Cellpose4Parameters params = Cellpose4Parameters.builder()
 				.stitchThreshold( 0. )
 				.computeFlows( true )
@@ -316,9 +344,10 @@ public class CellposeDimensionalitiesTest
 		test( cellpose4Runner( params ), CellposeTestDims.XYZT );
 	}
 
-	// @Test
-	public void testCellpose4_XYCZ_NoStich()
+	@Test
+	public void testCellpose4_XYCZ_NoStitch()
 	{
+		skipIfTestThresholdLessThan( 498 );
 		final Cellpose4Parameters params = Cellpose4Parameters.builder()
 				.stitchThreshold( 0. )
 				.computeFlows( true )
@@ -326,9 +355,10 @@ public class CellposeDimensionalitiesTest
 		test( cellpose4Runner( params ), CellposeTestDims.XYCZ );
 	}
 
-	// @Test
-	public void testCellpose3_XYCZ_NoStich_Mode3D()
+	@Test
+	public void testCellpose3_XYCZ_NoStitch_Mode3D()
 	{
+		skipIfTestThresholdLessThan( 9 );
 		final Cellpose3Parameters params = Cellpose3Parameters.builder()
 				.stitchThreshold( 0. )
 				.do3D( true )
@@ -337,9 +367,10 @@ public class CellposeDimensionalitiesTest
 		test( cellpose3Runner( params ), CellposeTestDims.XYCZ );
 	}
 
-	// @Test
-	public void testCellpose3_XYCZT_NoStich_Mode3D()
+	@Test
+	public void testCellpose3_XYCZT_NoStitch_Mode3D()
 	{
+		skipIfTestThresholdLessThan( 31 );
 		final Cellpose3Parameters params = Cellpose3Parameters.builder()
 				.stitchThreshold( 0. )
 				.do3D( true )
@@ -348,9 +379,10 @@ public class CellposeDimensionalitiesTest
 		test( cellpose3Runner( params ), CellposeTestDims.XYCZT );
 	}
 
-	// @Test // 90s
-	public void testCellpose4_XYCZ_NoStich_Mode3D()
+	@Test
+	public void testCellpose4_XYCZ_NoStitch_Mode3D()
 	{
+		skipIfTestThresholdLessThan( 8132 );
 		final Cellpose4Parameters params = Cellpose4Parameters.builder()
 				.stitchThreshold( 0. )
 				.do3D( true )
@@ -359,9 +391,10 @@ public class CellposeDimensionalitiesTest
 		test( cellpose4Runner( params ), CellposeTestDims.XYCZ );
 	}
 
-//	// @Test // So slow!!
-	public void testCellpose4_XYCZT_NoStich_Mode3D()
+	@Test
+	public void testCellpose4_XYCZT_NoStitch_Mode3D()
 	{
+		skipIfTestThresholdLessThan( 40309 );
 		final Cellpose4Parameters params = Cellpose4Parameters.builder()
 				.stitchThreshold( 0. )
 				.do3D( true )
@@ -370,9 +403,10 @@ public class CellposeDimensionalitiesTest
 		test( cellpose4Runner( params ), CellposeTestDims.XYCZT );
 	}
 
-	// @Test // 30s
-	public void testCellpose4_XYCZT_NoStich()
+	@Test
+	public void testCellpose4_XYCZT_NoStitch()
 	{
+		skipIfTestThresholdLessThan( 2166 );
 		final Cellpose4Parameters params = Cellpose4Parameters.builder()
 				.stitchThreshold( 0. )
 				.computeFlows( true )
@@ -563,6 +597,13 @@ public class CellposeDimensionalitiesTest
 		final FinalInterval blob = Intervals.createMinMax( center[ 0 ] - radius, center[ 1 ] - radius, center[ 0 ] + radius, center[ 1 ] + radius );
 		Views.interval( img, blob ).forEach( p -> p.set( 200 ) );
 	}
+
+	private static void skipIfTestThresholdLessThan( final int minimum )
+	{
+		final String thresholdValue = System.getenv( "TEST_THRESHOLD" );
+		final int threshold = thresholdValue == null ? 0 : Integer.parseInt( thresholdValue );
+		assumeTrue( threshold >= minimum );
+  }
 
 	// Used for debugging only.
 	public static void main( final String[] args )
