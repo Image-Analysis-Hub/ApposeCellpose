@@ -65,7 +65,7 @@ RandomAccessibleInterval< UnsignedByteType > flows = output.flows;
     <img src="docs/DemoOutput.png" alt="Labels output" width="25%" />
     <img src="docs/DemoOuputFlows.png" alt="Flows output" width="25%" />
 </p>
-(See [basic usage example code](https://github.com/imglib/imglib2-cellpose/blob/main/src/test/java/net/imglib2/cellpose/BasicUsage.java#L56).)
+(See [basic usage example code](https://github.com/imglib/imglib2-cellpose/blob/main/src/test/java/net/imglib2/cellpose/BasicUsage.java#L62).)
 
 The `Cellpose` gateway class also has a `cellpose4` method, with similar parameters, to run Cellpose 4.
 
@@ -95,7 +95,7 @@ CellposeOutput< UnsignedIntType > output = Cellpose.cellpose3(
     listener );
 ```
 
-(See [output type example code](https://github.com/imglib/imglib2-cellpose/blob/main/src/test/java/net/imglib2/cellpose/BasicUsage.java#L29).)
+(See [output type example code](https://github.com/imglib/imglib2-cellpose/blob/main/src/test/java/net/imglib2/cellpose/BasicUsage.java#L35).)
 
 ## Speciyfing parameters
 
@@ -228,6 +228,7 @@ try (
 // Outside of the try-with-resources block, the runner and the tmp shared memory images are
 // closed and cleaned up.
 ```
+(See [CellposeRunner example code](https://github.com/imglib/imglib2-cellpose/blob/main/src/test/java/net/imglib2/cellpose/BasicUsage.java#L94).)
 
 Here is an example of the timing on my Macbook Pro M1, processing 10 512x512 8-bit images:
 ```
