@@ -37,10 +37,10 @@ Check the `~/.local/share/appose/cellpose-appose/pixi.toml` file for details.
 
 ### CUDA-Torch version
 
-The `pixi.toml` current provide environement for `cp3` and `cp4` with torch CPU or CUDA Major.minor version support. They are defined as `<cellpose_version>-<torch_version>`, e.g. `cp3-cpu` for cellpose 3 with CPU or `cp4-cu126` for cellpose 4 with CUDA 12.6.
-You can choose the `torch version` support to use between `cpu`, `cu126` or `cu130` and be passed as the `torchVersion` parameter of the Cellpose parameter build explain below.
+The `pixi.toml` current provide environement for `cp3` and `cp4` with torch CPU or CUDA Major.minor version support. They are defined as `<cellpose_version>-<torch_version>`, e.g. `cp3-cpu` for cellpose 3 with CPU or `cp4-cu126` for cellpose 4 with CUDA 12.6.  
+You can choose the `torch version` support to use between `cpu`, `cu126` or `cu130` and pass it using the `torchVersion` parameter of the `Cellpose3Parameters` and `Cellpose4Parameters` classes (see below).
 
-More support can be added by extending the environement defined in the `pixi.toml`.
+More support version can be added by extending the environement defined in the `pixi.toml`.
 
 > [!NOTE]  
 > `CUDA` torch support is only available for Windows and Linux system with NVIDIA card.
