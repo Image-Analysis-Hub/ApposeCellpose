@@ -42,7 +42,7 @@ You can choose the `torch version` support to use between `cpu`, `cu126` or `cu1
 
 More support can be added by extending the environement defined in the `pixi.toml`.
 
-> [!NOTES]  
+> [!NOTE]  
 > `CUDA` torch support is only available for Windows and Linux system with NVIDIA card.
 
 
