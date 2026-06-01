@@ -1,3 +1,19 @@
+# imglib2-cellpose CI Build
+#
+# Caching Strategy:
+# 1. Maven dependencies (via setup-java cache: 'maven')
+# 2. Appose environments and tool binaries (~/.local/share/appose)
+#    - Includes pixi executable
+#    - Includes built cellpose environments
+# 3. Pixi package cache (rattler cache):
+#    - Linux: ~/.cache/rattler/cache
+# 4. uv package cache (used by pixi for PyPI dependencies):
+#    - Linux: ~/.cache/uv
+#
+# Cache keys are based on:
+# - pom.xml hash (appose version changes)
+# - src/main/resources/pixi.toml hash (environment spec changes)
+
 name: build
 
 on:
@@ -22,6 +38,32 @@ jobs:
           java-version: '21'
           distribution: 'zulu'
           cache: 'maven'
+
+      - name: Cache Appose environments and tools
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/share/appose
+          key: ${{ runner.os }}-appose-${{ hashFiles('pom.xml') }}-${{ hashFiles('src/main/resources/pixi.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-appose-${{ hashFiles('pom.xml') }}-
+            ${{ runner.os }}-appose-
+
+      - name: Cache Pixi packages (Rattler cache)
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/rattler/cache
+          key: ${{ runner.os }}-pixi-pkgs-${{ hashFiles('src/main/resources/pixi.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-pixi-pkgs-
+
+      - name: Cache uv packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/uv
+          key: ${{ runner.os }}-uv-pkgs-${{ hashFiles('src/main/resources/pixi.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-uv-pkgs-
+
       - name: Set up CI environment
         run: .github/setup.sh
         shell: bash
