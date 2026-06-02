@@ -30,16 +30,8 @@
 # OF THE POSSIBILITY OF SUCH DAMAGE.
 # #L%
 ###
-import numpy as np
-from cellpose import models, io
+from cellpose import models
 from typing import TYPE_CHECKING
-
-report = print
-
-def listen(callback):
-    global report
-    report = callback
-
 
 appose_mode = 'task' in globals()
 if appose_mode:
@@ -49,11 +41,9 @@ if appose_mode:
 
     from appose.python_worker import Task
     task = globals()['task']
-    listen(task.update)
 else:
-    from cp_utils import get_torch_device, share_as_ndarray
+    from cp_utils import get_torch_device
     from appose.python_worker import Task
-    import os
     sample_folder = '../../../samples/' # When you run this script from its location.
     task = Task()
 
